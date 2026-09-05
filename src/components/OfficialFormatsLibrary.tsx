@@ -954,6 +954,7 @@ It is requested that my resumption of duty may kindly be recorded in the officia
           </div>
 
         </div>
+        </div>
 
         {/* RIGHT COLUMN: Live Official Sindh Government Document */}
         <div className="lg:col-span-7 space-y-4">

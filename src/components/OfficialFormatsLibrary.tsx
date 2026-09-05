@@ -8,6 +8,9 @@ import {
   Shield,
   Layers,
   RotateCcw,
+  User,
+  Building,
+  RefreshCw,
 } from 'lucide-react';
 import { EmployeeData } from '../types';
 import { GovernmentEmblem } from './GovernmentEmblem';
@@ -22,47 +25,79 @@ export const OfficialFormatsLibrary: React.FC<Props> = ({ employee }) => {
     'covering_letter' | 'noc' | 'leave_proforma' | 'joining_report' | 'transfer_request'
   >('covering_letter');
 
+  // Standalone Employee Particulars State (Full manual control, not forced from arrears)
+  const [empName, setEmpName] = useState(employee.name || 'Muhammad Ali');
+  const [empFatherName, setEmpFatherName] = useState(employee.fatherName || 'Ghulam Rasool');
+  const [empDesignation, setEmpDesignation] = useState(employee.designation || 'Primary School Teacher (PST)');
+  const [empBps, setEmpBps] = useState<number | string>(employee.bps || 14);
+  const [empSchool, setEmpSchool] = useState(employee.schoolName || 'Govt. Boys Primary School, Main Campus');
+  const [empSemis, setEmpSemis] = useState(employee.semisCode || '403010123');
+  const [empPersonnelId, setEmpPersonnelId] = useState(employee.personnelId || '10845920');
+  const [empCnic, setEmpCnic] = useState(employee.cnic || '41303-1234567-1');
+  const [empDistrict, setEmpDistrict] = useState(employee.district?.replace('_', ' ') || 'Hyderabad');
+  const [empTaluka, setEmpTaluka] = useState(employee.taluka || 'Hyderabad Rural');
+  const [empDdoTitle, setEmpDdoTitle] = useState(employee.ddoFirstLine || 'Taluka Education Officer (TEO Primary Male)');
+  const [claimFromDate, setClaimFromDate] = useState(employee.appointmentDate || '2023-01-01');
+  const [claimToDate, setClaimToDate] = useState(employee.arrearUptoDate || '2025-12-31');
+
+  // Quick fill helper in case user optionally wants to pull current arrears data
+  const handleCopyFromArrears = () => {
+    if (employee.name) setEmpName(employee.name);
+    if (employee.fatherName) setEmpFatherName(employee.fatherName);
+    if (employee.designation) setEmpDesignation(employee.designation);
+    if (employee.bps) setEmpBps(employee.bps);
+    if (employee.schoolName) setEmpSchool(employee.schoolName);
+    if (employee.semisCode) setEmpSemis(employee.semisCode);
+    if (employee.personnelId) setEmpPersonnelId(employee.personnelId);
+    if (employee.cnic) setEmpCnic(employee.cnic);
+    if (employee.district) setEmpDistrict(employee.district.replace('_', ' '));
+    if (employee.taluka) setEmpTaluka(employee.taluka);
+    if (employee.ddoFirstLine) setEmpDdoTitle(employee.ddoFirstLine);
+    if (employee.appointmentDate) setClaimFromDate(employee.appointmentDate);
+    if (employee.arrearUptoDate) setClaimToDate(employee.arrearUptoDate);
+  };
+
   // Covering Letter state
   const [coveringPreset, setCoveringPreset] = useState<'arrears' | 'promotion' | 'increment' | 'general'>('arrears');
   const [letterRefNo, setLetterRefNo] = useState('DDO/SELD/ARREARS/2026/89');
   const [letterDate, setLetterDate] = useState(new Date().toISOString().split('T')[0]);
-  const [recipientOffice, setRecipientOffice] = useState('District Accounts Officer, District ' + (employee.district?.replace('_', ' ') || 'Sindh'));
+  const [recipientOffice, setRecipientOffice] = useState('District Accounts Officer, District Hyderabad');
   const [letterSubject, setLetterSubject] = useState('SUBMISSION OF SALARY ARREARS BILL (TR-22) FOR PAYMENT');
   const [letterBody, setLetterBody] = useState('');
   const [copyForwardedTo, setCopyForwardedTo] = useState(
-    `1. The Director School Education (ES&HS), ${employee.region || 'Hyderabad'}.
-2. The District Education Officer (ES&HS), ${employee.district?.replace('_', ' ') || 'District'}.
-3. The Taluka Education Officer (TEO), Taluka ${employee.taluka || 'Taluka'}.
+    `1. The Director School Education (ES&HS), Hyderabad Region.
+2. The District Education Officer (ES&HS), District Hyderabad.
+3. The Taluka Education Officer (TEO), Taluka Hyderabad Rural.
 4. Office copy.`
   );
 
   // Dynamic Generator for Covering Letter
   const generateCoveringLetterBody = (preset: 'arrears' | 'promotion' | 'increment' | 'general') => {
-    const empName = employee.name || 'Civil Servant';
-    const empDesig = employee.designation || 'Teacher';
-    const empBps = employee.bps || 14;
-    const school = employee.schoolName || 'Government School';
-    const semis = employee.semisCode || 'SEMIS';
-    const pId = employee.personnelId || 'P#';
-    const dist = employee.district?.replace('_', ' ') || 'Sindh';
+    const name = empName || 'Civil Servant';
+    const desig = empDesignation || 'Teacher';
+    const bps = empBps || 14;
+    const school = empSchool || 'Government School';
+    const semis = empSemis || 'SEMIS';
+    const pId = empPersonnelId || 'P#';
+    const dist = empDistrict || 'Sindh';
 
     switch (preset) {
       case 'arrears':
-        return `With utmost respect, I have the honour to submit herewith the Salary Arrears Bill (TR-22) along with itemized monthly schedule and non-payment certificate in respect of Mr./Ms. ${empName}, ${empDesig} (BPS-${empBps}), posted at ${school}, SEMIS Code ${semis}, Personnel SAP No. ${pId}.
+        return `With utmost respect, I have the honour to submit herewith the Salary Arrears Bill (TR-22) along with itemized monthly schedule and non-payment certificate in respect of Mr./Ms. ${name}, ${desig} (BPS-${bps}), posted at ${school}, SEMIS Code ${semis}, Personnel SAP No. ${pId}.
 
-The arrears pertains to the period from ${employee.appointmentDate || 'Joining Date'} to ${employee.arrearUptoDate || 'Arrear Upto Date'}. All necessary documentation including attested appointment order, first joining report, verification from competent authority, and non-payment certificate have been checked and verified in accordance with the rules.
+The arrears pertains to the period from ${claimFromDate || 'Joining Date'} to ${claimToDate || 'Arrear Upto Date'}. All necessary documentation including attested appointment order, first joining report, verification from competent authority, and non-payment certificate have been checked and verified in accordance with the rules.
 
 It is therefore requested that the attached arrears bill may kindly be passed and pre-audited for payment through SAP payroll system.`;
 
       case 'promotion':
-        return `With reference to the notification regarding upgradation / promotion of teachers to higher grade, I have the honour to forward herewith the pay fixation papers and service record in respect of Mr./Ms. ${empName}, ${empDesig} (BPS-${empBps}), Personnel SAP No. ${pId}, posted at ${school}, District ${dist}.
+        return `With reference to the notification regarding upgradation / promotion of teachers to higher grade, I have the honour to forward herewith the pay fixation papers and service record in respect of Mr./Ms. ${name}, ${desig} (BPS-${bps}), Personnel SAP No. ${pId}, posted at ${school}, District ${dist}.
 
 All requisite credentials, original service book entries, and DDO verification certificates are enclosed for necessary verification and fixation of revised pay scale in the SAP system.
 
 It is requested that the case may kindly be processed for early endorsement and revised pay entry.`;
 
       case 'increment':
-        return `I have the honour to submit the annual increment and pay restoration claim in respect of Mr./Ms. ${empName}, ${empDesig} (BPS-${empBps}), Personnel SAP No. ${pId}, posted at ${school}, District ${dist}.
+        return `I have the honour to submit the annual increment and pay restoration claim in respect of Mr./Ms. ${name}, ${desig} (BPS-${bps}), Personnel SAP No. ${pId}, posted at ${school}, District ${dist}.
 
 The official has completed required qualifying service during the evaluation period. Relevant documents and service book verification have been authenticated by the competent authority.
 
@@ -70,7 +105,7 @@ Kindly acknowledge and adjust the entitlement accordingly in the District payrol
 
       case 'general':
       default:
-        return `With utmost respect, I have the honour to submit herewith the official case papers regarding administrative and service matters of Mr./Ms. ${empName}, ${empDesig} (BPS-${empBps}), Personnel SAP No. ${pId}, posted at ${school}, District ${dist}.
+        return `With utmost respect, I have the honour to submit herewith the official case papers regarding administrative and service matters of Mr./Ms. ${name}, ${desig} (BPS-${bps}), Personnel SAP No. ${pId}, posted at ${school}, District ${dist}.
 
 All supportive documents are attached for your kind perusal and favorable consideration as per Sindh Civil Service Rules.`;
     }
@@ -82,30 +117,30 @@ All supportive documents are attached for your kind perusal and favorable consid
   const [nocBody, setNocBody] = useState('');
 
   const generateNocBody = (purpose: NocType) => {
-    const empName = employee.name || 'Civil Servant';
-    const father = employee.fatherName || 'Father';
-    const empDesig = employee.designation || 'Teacher';
-    const empBps = employee.bps || 14;
-    const school = employee.schoolName || 'Government School';
-    const dist = employee.district?.replace('_', ' ') || 'Sindh';
+    const name = empName || 'Civil Servant';
+    const father = empFatherName || 'Father';
+    const desig = empDesignation || 'Teacher';
+    const bps = empBps || 14;
+    const school = empSchool || 'Government School';
+    const dist = empDistrict || 'Sindh';
 
     switch (purpose) {
       case 'International Passport':
-        return `Certified that Mr./Ms. ${empName}, S/o ${father}, is a permanent and regular employee of the School Education & Literacy Department, Government of Sindh, holding the post of ${empDesig} (BPS-${empBps}) at ${school}, District ${dist}.
+        return `Certified that Mr./Ms. ${name}, S/o ${father}, is a permanent and regular employee of the School Education & Literacy Department, Government of Sindh, holding the post of ${desig} (BPS-${bps}) at ${school}, District ${dist}.
 
 This department has No Objection to his/her applying for the issuance / renewal of Machine Readable Passport (MRP) / National Travel Documents to visit abroad during sanctioned leave or vacations.
 
 It is further certified that no departmental inquiry, anti-corruption investigation, or audit recovery is pending against the said employee.`;
 
       case 'Higher Education (M.Phil / PhD / B.Ed)':
-        return `Certified that Mr./Ms. ${empName}, S/o ${father}, is a permanent and regular employee of the School Education & Literacy Department, Government of Sindh, holding the post of ${empDesig} (BPS-${empBps}) at ${school}, District ${dist}.
+        return `Certified that Mr./Ms. ${name}, S/o ${father}, is a permanent and regular employee of the School Education & Literacy Department, Government of Sindh, holding the post of ${desig} (BPS-${bps}) at ${school}, District ${dist}.
 
 This department has No Objection to his/her securing admission and pursuing Higher Studies / Degree Program (B.Ed / M.Ed / M.Phil / PhD) in a recognized University on evening / weekend or self-financed basis without affecting official government school teaching duties.
 
 It is further certified that no disciplinary proceeding or adverse remarks exist in the employee's official service record.`;
 
       case 'Competitive Exam (SPSC / FPSC)':
-        return `Certified that Mr./Ms. ${empName}, S/o ${father}, is a permanent and regular employee of the School Education & Literacy Department, Government of Sindh, holding the post of ${empDesig} (BPS-${empBps}) at ${school}, District ${dist}.
+        return `Certified that Mr./Ms. ${name}, S/o ${father}, is a permanent and regular employee of the School Education & Literacy Department, Government of Sindh, holding the post of ${desig} (BPS-${bps}) at ${school}, District ${dist}.
 
 This department has No Objection to his/her applying and appearing in the Competitive Examination / Direct Recruitment Selection conducted by the Sindh Public Service Commission (SPSC) / Federal Public Service Commission (FPSC) through proper departmental channel.
 
@@ -113,7 +148,7 @@ If selected, the applicant will be relieved from this department in accordance w
 
       case 'Departmental NOC / General':
       default:
-        return `Certified that Mr./Ms. ${empName}, S/o ${father}, is a regular civil servant of School Education & Literacy Department, Govt of Sindh, serving as ${empDesig} (BPS-${empBps}) at ${school}, District ${dist}.
+        return `Certified that Mr./Ms. ${name}, S/o ${father}, is a regular civil servant of School Education & Literacy Department, Govt of Sindh, serving as ${desig} (BPS-${bps}) at ${school}, District ${dist}.
 
 This department has No Objection to the subject case / request in accordance with the prevailing government rules and administrative policies.
 
@@ -151,26 +186,26 @@ It is certified that the employee holds satisfactory performance record and no a
   const [joiningBody, setJoiningBody] = useState('');
 
   const generateJoiningBody = (occasion: JoiningOccasion, jDate: string, jTime: string) => {
-    const empName = employee.name || 'Civil Servant';
-    const father = employee.fatherName || 'Father';
-    const empDesig = employee.designation || 'Teacher';
-    const empBps = employee.bps || 14;
-    const school = employee.schoolName || 'Government School';
+    const name = empName || 'Civil Servant';
+    const father = empFatherName || 'Father';
+    const desig = empDesignation || 'Teacher';
+    const bps = empBps || 14;
+    const school = empSchool || 'Government School';
 
     switch (occasion) {
       case 'New Appointment':
-        return `With reference to the first appointment order issued by the competent authority, I, ${empName}, S/o ${father}, hereby submit my formal joining report for duty on this day ${jDate} in the ${jTime} as ${empDesig} (BPS-${empBps}) at ${school}.
+        return `With reference to the first appointment order issued by the competent authority, I, ${name}, S/o ${father}, hereby submit my formal joining report for duty on this day ${jDate} in the ${jTime} as ${desig} (BPS-${bps}) at ${school}.
 
 It is respectfully requested that my joining report may kindly be accepted and transmitted to the District Accounts Office for regular disbursement of salary through SAP payroll.`;
 
       case 'Transfer / Posting':
-        return `In compliance with the transfer and posting order issued by the competent authority, I, ${empName}, S/o ${father}, have relinquished charge from previous station and hereby submit my formal joining report at ${school} on this day ${jDate} in the ${jTime} as ${empDesig} (BPS-${empBps}).
+        return `In compliance with the transfer and posting order issued by the competent authority, I, ${name}, S/o ${father}, have relinquished charge from previous station and hereby submit my formal joining report at ${school} on this day ${jDate} in the ${jTime} as ${desig} (BPS-${bps}).
 
 It is requested that my joining report may kindly be countersigned and submitted for LPC and payroll transfer.`;
 
       case 'Return from Sanctioned Leave':
       default:
-        return `In pursuance of the sanctioned leave order, I, ${empName}, S/o ${father}, hereby report back for duty on expiry of leave on this day ${jDate} in the ${jTime} at ${school}.
+        return `In pursuance of the sanctioned leave order, I, ${name}, S/o ${father}, hereby report back for duty on expiry of leave on this day ${jDate} in the ${jTime} at ${school}.
 
 It is requested that my resumption of duty may kindly be recorded in the official attendance register and service book.`;
     }
@@ -183,43 +218,42 @@ It is requested that my resumption of duty may kindly be recorded in the officia
   const [transferJustification, setTransferJustification] = useState('');
 
   const generateTransferJustification = (ground: TransferGround, target: string) => {
-    const empDesig = employee.designation || 'Teacher';
-    const empBps = employee.bps || 14;
-    const school = employee.schoolName || 'Current School';
-    const dist = employee.district?.replace('_', ' ') || 'District';
+    const desig = empDesignation || 'Teacher';
+    const bps = empBps || 14;
+    const school = empSchool || 'Current School';
+    const dist = empDistrict || 'District';
 
     switch (ground) {
       case 'Spouse Policy (Wedlock)':
-        return `Most respectfully, it is submitted that I am currently serving as ${empDesig} (BPS-${empBps}) at ${school}. Under the Govt of Sindh Wedlock / Compassionate Transfer Policy, my spouse is posted in ${dist}. I request to be posted at ${target} to maintain family integrity and ensure dedicated academic performance.`;
+        return `Most respectfully, it is submitted that I am currently serving as ${desig} (BPS-${bps}) at ${school}. Under the Govt of Sindh Wedlock / Compassionate Transfer Policy, my spouse is posted in ${dist}. I request to be posted at ${target} to maintain family integrity and ensure dedicated academic performance.`;
 
       case 'Mutual Transfer':
-        return `Most respectfully, it is submitted that I am currently serving as ${empDesig} (BPS-${empBps}) at ${school}. I have mutually agreed with a matching grade colleague for bilateral transfer. I request to be posted at ${target} in the best public interest without dislocation of academic activities.`;
+        return `Most respectfully, it is submitted that I am currently serving as ${desig} (BPS-${bps}) at ${school}. I have mutually agreed with a matching grade colleague for bilateral transfer. I request to be posted at ${target} in the best public interest without dislocation of academic activities.`;
 
       case 'Medical / Hardship':
-        return `Most respectfully, it is submitted that I am currently serving as ${empDesig} (BPS-${empBps}) at ${school}. On severe medical / compassionate grounds supported by medical certificates, I request to be posted at ${target} for accessible treatment and continuous duty.`;
+        return `Most respectfully, it is submitted that I am currently serving as ${desig} (BPS-${bps}) at ${school}. On severe medical / compassionate grounds supported by medical certificates, I request to be posted at ${target} for accessible treatment and continuous duty.`;
 
       case 'Administrative':
       default:
-        return `Most respectfully, it is submitted that I am currently serving as ${empDesig} (BPS-${empBps}) at ${school}. In accordance with departmental requirement and rationalization policy, I request posting adjustment at ${target}.`;
+        return `Most respectfully, it is submitted that I am currently serving as ${desig} (BPS-${bps}) at ${school}. In accordance with departmental requirement and rationalization policy, I request posting adjustment at ${target}.`;
     }
   };
 
-  // Initialize and auto-sync dynamic text when employee data changes or on first render
+  // Initialize initial body texts once
   useEffect(() => {
-    setLetterBody(generateCoveringLetterBody(coveringPreset));
-  }, [employee, coveringPreset]);
-
-  useEffect(() => {
-    setNocBody(generateNocBody(nocPurpose));
-  }, [employee, nocPurpose]);
-
-  useEffect(() => {
-    setJoiningBody(generateJoiningBody(joiningCause, joiningDate, joiningTime));
-  }, [employee, joiningCause, joiningDate, joiningTime]);
-
-  useEffect(() => {
-    setTransferJustification(generateTransferJustification(transferGround, targetSchool));
-  }, [employee, transferGround, targetSchool]);
+    if (!letterBody) {
+      setLetterBody(generateCoveringLetterBody(coveringPreset));
+    }
+    if (!nocBody) {
+      setNocBody(generateNocBody(nocPurpose));
+    }
+    if (!joiningBody) {
+      setJoiningBody(generateJoiningBody(joiningCause, joiningDate, joiningTime));
+    }
+    if (!transferJustification) {
+      setTransferJustification(generateTransferJustification(transferGround, targetSchool));
+    }
+  }, []);
 
   const [isExportingPDF, setIsExportingPDF] = useState(false);
 
@@ -229,7 +263,7 @@ It is requested that my resumption of duty may kindly be recorded in the officia
 
   const handleExportPDF = async () => {
     try {
-      const cleanName = (employee.name || 'Official').replace(/[^a-zA-Z0-9]/g, '_');
+      const cleanName = (empName || 'Official').replace(/[^a-zA-Z0-9]/g, '_');
       await exportSingleDocumentToPDF(
         'official-formats-document-view',
         `Sindh_${selectedFormat.toUpperCase()}_${cleanName}.pdf`,
@@ -352,21 +386,205 @@ It is requested that my resumption of duty may kindly be recorded in the officia
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         
         {/* LEFT COLUMN: Dynamic Parameters Form Panel */}
-        <div className="lg:col-span-5 bg-white border border-slate-200 rounded-2xl p-5 shadow-sm space-y-4">
+        <div className="lg:col-span-5 space-y-4">
           
-          <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-            <h3 className="font-bold text-sm text-slate-900">
-              {selectedFormat === 'covering_letter' && 'Official Covering Letter Parameters'}
-              {selectedFormat === 'noc' && 'NOC Parameters & Dynamic Body'}
-              {selectedFormat === 'leave_proforma' && 'Leave Proforma Details'}
-              {selectedFormat === 'joining_report' && 'Joining Report Parameters'}
-              {selectedFormat === 'transfer_request' && 'Transfer Application Details'}
-            </h3>
+          {/* APPLICANT / EMPLOYEE PARTICULARS (INDEPENDENT INPUTS) */}
+          <div className="bg-white border border-slate-200 rounded-2xl p-4 sm:p-5 shadow-sm space-y-3.5">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">
+              <div className="flex items-center space-x-2">
+                <div className="w-7 h-7 rounded-lg bg-blue-50 border border-blue-200 text-blue-700 flex items-center justify-center">
+                  <User className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-xs sm:text-sm text-slate-900">Applicant / Employee Particulars</h3>
+                  <p className="text-[10px] text-slate-500">All fields are editable &amp; independent of Arrears calculations</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={handleCopyFromArrears}
+                className="px-2 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-[10px] font-semibold flex items-center space-x-1 cursor-pointer transition"
+                title="Optionally copy current details from Arrears form"
+              >
+                <RefreshCw className="w-3 h-3" />
+                <span>Sync with Arrears</span>
+              </button>
+            </div>
 
-            <span className="text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-lg border border-emerald-200">
-              Live Synchronized
-            </span>
+            <div className="space-y-3 text-xs">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                <div>
+                  <label className="block font-semibold text-slate-700 mb-1 text-[11px]">Full Name</label>
+                  <input
+                    type="text"
+                    value={empName}
+                    onChange={(e) => setEmpName(e.target.value)}
+                    placeholder="e.g. Muhammad Ali"
+                    className="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-300 rounded-lg focus:bg-white text-slate-900 font-semibold"
+                  />
+                </div>
+                <div>
+                  <label className="block font-semibold text-slate-700 mb-1 text-[11px]">Father's / Husband's Name</label>
+                  <input
+                    type="text"
+                    value={empFatherName}
+                    onChange={(e) => setEmpFatherName(e.target.value)}
+                    placeholder="e.g. Ghulam Rasool"
+                    className="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-300 rounded-lg focus:bg-white text-slate-900 font-medium"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                <div className="sm:col-span-2">
+                  <label className="block font-semibold text-slate-700 mb-1 text-[11px]">Designation</label>
+                  <input
+                    type="text"
+                    value={empDesignation}
+                    onChange={(e) => setEmpDesignation(e.target.value)}
+                    placeholder="e.g. Primary School Teacher (PST)"
+                    className="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-300 rounded-lg focus:bg-white text-slate-900 font-medium"
+                  />
+                </div>
+                <div>
+                  <label className="block font-semibold text-slate-700 mb-1 text-[11px]">BPS Grade</label>
+                  <select
+                    value={empBps}
+                    onChange={(e) => setEmpBps(e.target.value)}
+                    className="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-300 rounded-lg focus:bg-white text-slate-900 font-bold"
+                  >
+                    <option value={14}>BPS-14</option>
+                    <option value={16}>BPS-16</option>
+                    <option value={9}>BPS-09</option>
+                    <option value={11}>BPS-11</option>
+                    <option value={15}>BPS-15</option>
+                    <option value={17}>BPS-17</option>
+                    <option value={18}>BPS-18</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                <div>
+                  <label className="block font-semibold text-slate-700 mb-1 text-[11px]">Personnel SAP No.</label>
+                  <input
+                    type="text"
+                    value={empPersonnelId}
+                    onChange={(e) => setEmpPersonnelId(e.target.value)}
+                    placeholder="e.g. 10845920"
+                    className="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-300 rounded-lg focus:bg-white text-slate-900 font-mono"
+                  />
+                </div>
+                <div>
+                  <label className="block font-semibold text-slate-700 mb-1 text-[11px]">CNIC No.</label>
+                  <input
+                    type="text"
+                    value={empCnic}
+                    onChange={(e) => setEmpCnic(e.target.value)}
+                    placeholder="e.g. 41303-1234567-1"
+                    className="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-300 rounded-lg focus:bg-white text-slate-900 font-mono"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                <div className="sm:col-span-2">
+                  <label className="block font-semibold text-slate-700 mb-1 text-[11px]">School / Station Name</label>
+                  <input
+                    type="text"
+                    value={empSchool}
+                    onChange={(e) => setEmpSchool(e.target.value)}
+                    placeholder="e.g. Govt. Boys Primary School"
+                    className="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-300 rounded-lg focus:bg-white text-slate-900 font-medium"
+                  />
+                </div>
+                <div>
+                  <label className="block font-semibold text-slate-700 mb-1 text-[11px]">SEMIS Code</label>
+                  <input
+                    type="text"
+                    value={empSemis}
+                    onChange={(e) => setEmpSemis(e.target.value)}
+                    placeholder="e.g. 403010123"
+                    className="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-300 rounded-lg focus:bg-white text-slate-900 font-mono"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                <div>
+                  <label className="block font-semibold text-slate-700 mb-1 text-[11px]">District</label>
+                  <input
+                    type="text"
+                    value={empDistrict}
+                    onChange={(e) => setEmpDistrict(e.target.value)}
+                    placeholder="e.g. Hyderabad"
+                    className="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-300 rounded-lg focus:bg-white text-slate-900"
+                  />
+                </div>
+                <div>
+                  <label className="block font-semibold text-slate-700 mb-1 text-[11px]">Taluka</label>
+                  <input
+                    type="text"
+                    value={empTaluka}
+                    onChange={(e) => setEmpTaluka(e.target.value)}
+                    placeholder="e.g. Hyderabad Rural"
+                    className="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-300 rounded-lg focus:bg-white text-slate-900"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block font-semibold text-slate-700 mb-1 text-[11px]">DDO Designation &amp; Office Title</label>
+                <input
+                  type="text"
+                  value={empDdoTitle}
+                  onChange={(e) => setEmpDdoTitle(e.target.value)}
+                  placeholder="e.g. Taluka Education Officer (TEO Primary Male)"
+                  className="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-300 rounded-lg focus:bg-white text-slate-900 font-medium"
+                />
+              </div>
+
+              {selectedFormat === 'covering_letter' && coveringPreset === 'arrears' && (
+                <div className="grid grid-cols-2 gap-2.5 p-2 bg-blue-50/70 border border-blue-200 rounded-lg">
+                  <div>
+                    <label className="block font-semibold text-blue-900 mb-1 text-[10px]">Claim Period From</label>
+                    <input
+                      type="date"
+                      value={claimFromDate}
+                      onChange={(e) => setClaimFromDate(e.target.value)}
+                      className="w-full px-2 py-1 bg-white border border-blue-300 rounded text-slate-900 text-xs"
+                    />
+                  </div>
+                  <div>
+                    <label className="block font-semibold text-blue-900 mb-1 text-[10px]">Claim Period To</label>
+                    <input
+                      type="date"
+                      value={claimToDate}
+                      onChange={(e) => setClaimToDate(e.target.value)}
+                      className="w-full px-2 py-1 bg-white border border-blue-300 rounded text-slate-900 text-xs"
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
+
+          {/* DOCUMENT SPECIFIC CONTROLS */}
+          <div className="bg-white border border-slate-200 rounded-2xl p-4 sm:p-5 shadow-sm space-y-4">
+            
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <h3 className="font-bold text-sm text-slate-900">
+                {selectedFormat === 'covering_letter' && 'Covering Letter Options'}
+                {selectedFormat === 'noc' && 'NOC Options & Certification Text'}
+                {selectedFormat === 'leave_proforma' && 'Leave Proforma Details'}
+                {selectedFormat === 'joining_report' && 'Joining Report Options'}
+                {selectedFormat === 'transfer_request' && 'Transfer Application Options'}
+              </h3>
+
+              <span className="text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-lg border border-emerald-200">
+                Live Preview
+              </span>
+            </div>
 
           <div className="space-y-4 text-xs">
             
@@ -773,10 +991,10 @@ It is requested that my resumption of duty may kindly be recorded in the officia
                 Government of Sindh
               </h2>
               <p className="text-xs font-semibold text-slate-700 uppercase tracking-wide font-sans">
-                School Education & Literacy Department &bull; Office of the {employee.ddoFirstLine || 'DDO'}
+                School Education & Literacy Department &bull; Office of the {empDdoTitle || 'DDO'}
               </p>
               <p className="text-[11px] font-bold text-blue-900 font-sans uppercase">
-                Taluka {employee.taluka || 'Taluka'}, District {employee.district?.replace('_', ' ') || 'Sindh'}
+                Taluka {empTaluka || 'Taluka'}, District {empDistrict || 'Sindh'}
               </p>
             </div>
 
@@ -806,8 +1024,8 @@ It is requested that my resumption of duty may kindly be recorded in the officia
                 <div className="pt-10 flex justify-end font-sans">
                   <div className="text-center w-64">
                     <div className="border-t border-slate-800 pt-1 font-bold">Drawing &amp; Disbursing Officer (DDO)</div>
-                    <div className="text-slate-600 text-[11px]">{employee.ddoFirstLine}</div>
-                    <div className="text-slate-600 text-[11px]">Taluka {employee.taluka}, Dist. {employee.district?.replace('_', ' ')}</div>
+                    <div className="text-slate-600 text-[11px]">{empDdoTitle}</div>
+                    <div className="text-slate-600 text-[11px]">Taluka {empTaluka}, Dist. {empDistrict}</div>
                   </div>
                 </div>
 
@@ -840,23 +1058,23 @@ It is requested that my resumption of duty may kindly be recorded in the officia
                   <tbody>
                     <tr className="bg-slate-50">
                       <td className="border border-slate-400 p-2 font-bold w-1/3">Name of Officer/Teacher:</td>
-                      <td className="border border-slate-400 p-2 font-semibold">{employee.name || '—'}</td>
+                      <td className="border border-slate-400 p-2 font-semibold">{empName || '—'}</td>
                     </tr>
                     <tr>
                       <td className="border border-slate-400 p-2 font-bold">Designation &amp; BPS:</td>
-                      <td className="border border-slate-400 p-2">{employee.designation || 'Teacher'} (BPS-{employee.bps || '14'})</td>
+                      <td className="border border-slate-400 p-2">{empDesignation || 'Teacher'} (BPS-{empBps || '14'})</td>
                     </tr>
                     <tr className="bg-slate-50">
                       <td className="border border-slate-400 p-2 font-bold">CNIC Number:</td>
-                      <td className="border border-slate-400 p-2">{employee.cnic || '—'}</td>
+                      <td className="border border-slate-400 p-2">{empCnic || '—'}</td>
                     </tr>
                     <tr>
                       <td className="border border-slate-400 p-2 font-bold">Personnel SAP ID:</td>
-                      <td className="border border-slate-400 p-2 font-mono">{employee.personnelId || '—'}</td>
+                      <td className="border border-slate-400 p-2 font-mono">{empPersonnelId || '—'}</td>
                     </tr>
                     <tr className="bg-slate-50">
                       <td className="border border-slate-400 p-2 font-bold">School Posting:</td>
-                      <td className="border border-slate-400 p-2">{employee.schoolName || '—'}</td>
+                      <td className="border border-slate-400 p-2">{empSchool || '—'}</td>
                     </tr>
                   </tbody>
                 </table>
@@ -864,7 +1082,7 @@ It is requested that my resumption of duty may kindly be recorded in the officia
                 <div className="pt-12 flex justify-end font-sans">
                   <div className="text-center w-64">
                     <div className="border-t border-slate-800 pt-1 font-bold">COMPETENT AUTHORITY / DDO</div>
-                    <div className="text-slate-600 text-[11px]">{employee.ddoFirstLine}</div>
+                    <div className="text-slate-600 text-[11px]">{empDdoTitle}</div>
                   </div>
                 </div>
               </div>
@@ -878,14 +1096,14 @@ It is requested that my resumption of duty may kindly be recorded in the officia
                 </div>
 
                 <div className="grid grid-cols-2 gap-x-4 gap-y-2 border border-slate-300 p-3 rounded-lg font-sans text-xs">
-                  <div><strong>1. Applicant Name:</strong> {employee.name || '—'}</div>
-                  <div><strong>2. Father's Name:</strong> {employee.fatherName || '—'}</div>
-                  <div><strong>3. Designation &amp; BPS:</strong> {employee.designation || 'Teacher'} (BPS-{employee.bps || '14'})</div>
-                  <div><strong>4. SAP Personnel No:</strong> {employee.personnelId || '—'}</div>
+                  <div><strong>1. Applicant Name:</strong> {empName || '—'}</div>
+                  <div><strong>2. Father's Name:</strong> {empFatherName || '—'}</div>
+                  <div><strong>3. Designation &amp; BPS:</strong> {empDesignation || 'Teacher'} (BPS-{empBps || '14'})</div>
+                  <div><strong>4. SAP Personnel No:</strong> {empPersonnelId || '—'}</div>
                   <div><strong>5. Nature of Leave:</strong> {leaveType}</div>
                   <div><strong>6. Period of Leave:</strong> {leaveDays} Days (From {leaveFrom})</div>
                   <div className="col-span-2"><strong>7. Purpose / Reason:</strong> {leaveReason}</div>
-                  <div className="col-span-2"><strong>8. School / Station:</strong> {employee.schoolName || '—'}, Taluka {employee.taluka || '—'}</div>
+                  <div className="col-span-2"><strong>8. School / Station:</strong> {empSchool || '—'}, Taluka {empTaluka || '—'}</div>
                 </div>
 
                 <p className="text-justify font-serif pt-2">
@@ -895,11 +1113,11 @@ It is requested that my resumption of duty may kindly be recorded in the officia
                 <div className="pt-8 flex justify-between font-sans text-xs">
                   <div>
                     <div className="font-bold border-t border-slate-700 pt-1">Signature of Applicant</div>
-                    <span>{employee.name || 'Employee'}</span>
+                    <span>{empName || 'Employee'}</span>
                   </div>
                   <div className="text-right">
                     <div className="font-bold border-t border-slate-700 pt-1">Sanctioned By (TEO / DEO)</div>
-                    <span>SE&amp;LD {employee.district?.replace('_', ' ') || 'Sindh'}</span>
+                    <span>SE&amp;LD {empDistrict || 'Sindh'}</span>
                   </div>
                 </div>
               </div>
@@ -915,11 +1133,11 @@ It is requested that my resumption of duty may kindly be recorded in the officia
                 <div className="font-sans text-xs pt-2">
                   <div><strong>To,</strong></div>
                   <div className="pl-4 font-semibold text-slate-900">The Headmaster / Taluka Education Officer (TEO),</div>
-                  <div className="pl-4 text-slate-700">{employee.schoolName || 'School'}, Taluka {employee.taluka || 'Taluka'}.</div>
+                  <div className="pl-4 text-slate-700">{empSchool || 'School'}, Taluka {empTaluka || 'Taluka'}.</div>
                 </div>
 
                 <div className="pt-2 font-bold font-sans text-xs uppercase underline">
-                  SUBJECT: JOINING REPORT AS {employee.designation?.toUpperCase() || 'TEACHER'} (BPS-{employee.bps || '14'})
+                  SUBJECT: JOINING REPORT AS {String(empDesignation).toUpperCase() || 'TEACHER'} (BPS-{empBps || '14'})
                 </div>
 
                 <div className="pt-2 font-serif text-justify indent-6 space-y-3">
@@ -929,11 +1147,11 @@ It is requested that my resumption of duty may kindly be recorded in the officia
                 <div className="pt-10 flex justify-between font-sans text-xs">
                   <div>
                     <div className="font-bold border-t border-slate-700 pt-1">Signature of Teacher</div>
-                    <span>{employee.name || 'Employee'} (CNIC: {employee.cnic || '—'})</span>
+                    <span>{empName || 'Employee'} (CNIC: {empCnic || '—'})</span>
                   </div>
                   <div className="text-right">
                     <div className="font-bold border-t border-slate-700 pt-1">Counter-Signed by Headmaster / DDO</div>
-                    <span>{employee.schoolName || 'School'}</span>
+                    <span>{empSchool || 'School'}</span>
                   </div>
                 </div>
               </div>
@@ -949,7 +1167,7 @@ It is requested that my resumption of duty may kindly be recorded in the officia
                 <div className="font-sans text-xs pt-2">
                   <div><strong>To,</strong></div>
                   <div className="pl-4 font-semibold text-slate-900">The District Education Officer (ES&amp;HS),</div>
-                  <div className="pl-4 text-slate-700">{employee.district?.replace('_', ' ') || 'District'}.</div>
+                  <div className="pl-4 text-slate-700">{empDistrict || 'District'}.</div>
                 </div>
 
                 <div className="pt-2 font-bold font-sans text-xs uppercase underline">
@@ -963,11 +1181,11 @@ It is requested that my resumption of duty may kindly be recorded in the officia
                 <div className="pt-10 flex justify-between font-sans text-xs">
                   <div>
                     <div className="font-bold border-t border-slate-700 pt-1">Signature of Applicant</div>
-                    <span>{employee.name || 'Employee'} ({employee.designation || 'Teacher'}, BPS-{employee.bps || '14'})</span>
+                    <span>{empName || 'Employee'} ({empDesignation || 'Teacher'}, BPS-{empBps || '14'})</span>
                   </div>
                   <div className="text-right">
                     <div className="font-bold border-t border-slate-700 pt-1">Forwarded by DDO with Recommendation</div>
-                    <span>{employee.ddoFirstLine || 'DDO'}</span>
+                    <span>{empDdoTitle || 'DDO'}</span>
                   </div>
                 </div>
               </div>

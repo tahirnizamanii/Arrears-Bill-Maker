@@ -6,6 +6,8 @@ import {
   Calculator,
   Award,
   Layers,
+  User,
+  RefreshCw,
 } from 'lucide-react';
 import { EmployeeData } from '../types';
 import { GovernmentEmblem } from './GovernmentEmblem';
@@ -38,6 +40,36 @@ const SINDH_COMMUTATION_AGE_RATES: Record<number, number> = {
 type SubDocType = 'all' | 'calc_sheet' | 'form1' | 'sanction' | 'lpr';
 
 export const PensionPapersGenerator: React.FC<Props> = ({ employee }) => {
+  // Standalone Pensioner Particulars State (Full manual control, not forced from arrears)
+  const [pensionerName, setPensionerName] = useState(employee.name || 'Muhammad Ali');
+  const [pensionerFatherName, setPensionerFatherName] = useState(employee.fatherName || 'Ghulam Rasool');
+  const [pensionerDesignation, setPensionerDesignation] = useState(employee.designation || 'Primary School Teacher (PST)');
+  const [pensionerBps, setPensionerBps] = useState<number | string>(employee.bps || 14);
+  const [pensionerSchool, setPensionerSchool] = useState(employee.schoolName || 'Govt. Boys Primary School, Main Campus');
+  const [pensionerSemis, setPensionerSemis] = useState(employee.semisCode || '403010123');
+  const [pensionerPersonnelId, setPensionerPersonnelId] = useState(employee.personnelId || '10845920');
+  const [pensionerCnic, setPensionerCnic] = useState(employee.cnic || '41303-1234567-1');
+  const [pensionerDistrict, setPensionerDistrict] = useState(employee.district?.replace('_', ' ') || 'Hyderabad');
+  const [pensionerTaluka, setPensionerTaluka] = useState(employee.taluka || 'Hyderabad Rural');
+  const [pensionerDdoTitle, setPensionerDdoTitle] = useState(employee.ddoFirstLine || 'Taluka Education Officer (TEO Primary Male)');
+  const [pensionerDateOfJoining, setPensionerDateOfJoining] = useState(employee.appointmentDate || '1996-07-15');
+
+  const handleCopyFromArrears = () => {
+    if (employee.name) setPensionerName(employee.name);
+    if (employee.fatherName) setPensionerFatherName(employee.fatherName);
+    if (employee.designation) setPensionerDesignation(employee.designation);
+    if (employee.bps) setPensionerBps(employee.bps);
+    if (employee.schoolName) setPensionerSchool(employee.schoolName);
+    if (employee.semisCode) setPensionerSemis(employee.semisCode);
+    if (employee.personnelId) setPensionerPersonnelId(employee.personnelId);
+    if (employee.cnic) setPensionerCnic(employee.cnic);
+    if (employee.district) setPensionerDistrict(employee.district.replace('_', ' '));
+    if (employee.taluka) setPensionerTaluka(employee.taluka);
+    if (employee.ddoFirstLine) setPensionerDdoTitle(employee.ddoFirstLine);
+    if (employee.appointmentDate) setPensionerDateOfJoining(employee.appointmentDate);
+    if (employee.basicPayRate) setLastBasicPay(employee.basicPayRate);
+  };
+
   // Pension Specific State
   const [dateOfBirth, setDateOfBirth] = useState('1966-07-15');
   const [dateOfRetirement, setDateOfRetirement] = useState('2026-07-14');
@@ -74,7 +106,8 @@ export const PensionPapersGenerator: React.FC<Props> = ({ employee }) => {
   const netMonthlyPension = grossPension - commutedPensionPortion;
   
   // Medical Allowance for Pensioners (25% for BPS 1-15, 20% for BPS 16-22)
-  const medicalAllowancePercent = employee.bps <= 15 ? 0.25 : 0.20;
+  const numBps = Number(pensionerBps) || 14;
+  const medicalAllowancePercent = numBps <= 15 ? 0.25 : 0.20;
   const pensionerMedicalAllowance = Math.round(netMonthlyPension * medicalAllowancePercent);
   
   // Ad-hoc increases on pension (estimated combined ~30% net relief)
@@ -95,7 +128,7 @@ export const PensionPapersGenerator: React.FC<Props> = ({ employee }) => {
   const handleExportFullPensionPDF = async () => {
     try {
       await generateFullPensionPDF({
-        employeeName: employee.name || 'Pensioner',
+        employeeName: pensionerName || 'Pensioner',
         pageElementIds: [
           'pension-dossier-page-1',
           'pension-dossier-page-2',
@@ -133,7 +166,7 @@ export const PensionPapersGenerator: React.FC<Props> = ({ employee }) => {
           Government of Sindh
         </h2>
         <p className="text-xs font-semibold text-slate-700 uppercase tracking-wide font-sans">
-          School Education & Literacy Department &bull; District Accounts Office {employee.district?.replace('_', ' ') || 'Sindh'}
+          School Education & Literacy Department &bull; District Accounts Office {pensionerDistrict || 'Sindh'}
         </p>
         <p className="text-[11px] font-bold text-purple-900 font-sans uppercase">
           OFFICIAL PENSION & 35% COMMUTATION CALCULATION PROFORMA (PAGE 1 OF 4)
@@ -145,24 +178,24 @@ export const PensionPapersGenerator: React.FC<Props> = ({ employee }) => {
           <tbody>
             <tr className="bg-slate-100">
               <td className="border border-slate-400 p-2 font-bold w-1/3">1. Name of Civil Servant:</td>
-              <td className="border border-slate-400 p-2 font-semibold">{employee.name} (S/o {employee.fatherName})</td>
+              <td className="border border-slate-400 p-2 font-semibold">{pensionerName} (S/o {pensionerFatherName})</td>
             </tr>
             <tr>
               <td className="border border-slate-400 p-2 font-bold">2. Designation & BPS Scale:</td>
-              <td className="border border-slate-400 p-2">{employee.designation} (BPS-{employee.bps})</td>
+              <td className="border border-slate-400 p-2">{pensionerDesignation} (BPS-{pensionerBps})</td>
             </tr>
             <tr className="bg-slate-100">
               <td className="border border-slate-400 p-2 font-bold">3. CNIC & SAP Personnel No:</td>
-              <td className="border border-slate-400 p-2">{employee.cnic} &bull; P# {employee.personnelId}</td>
+              <td className="border border-slate-400 p-2">{pensionerCnic} &bull; P# {pensionerPersonnelId}</td>
             </tr>
             <tr>
               <td className="border border-slate-400 p-2 font-bold">4. School & SEMIS Code:</td>
-              <td className="border border-slate-400 p-2">{employee.schoolName} (SEMIS: {employee.semisCode})</td>
+              <td className="border border-slate-400 p-2">{pensionerSchool} (SEMIS: {pensionerSemis})</td>
             </tr>
             <tr className="bg-slate-100">
               <td className="border border-slate-400 p-2 font-bold">5. Dates of Service:</td>
               <td className="border border-slate-400 p-2">
-                DOB: <strong>{dateOfBirth}</strong> | Joining: <strong>{employee.appointmentDate}</strong> | Retirement: <strong>{dateOfRetirement}</strong>
+                DOB: <strong>{dateOfBirth}</strong> | Joining: <strong>{pensionerDateOfJoining}</strong> | Retirement: <strong>{dateOfRetirement}</strong>
               </td>
             </tr>
             <tr>
@@ -226,15 +259,15 @@ export const PensionPapersGenerator: React.FC<Props> = ({ employee }) => {
         <div className="pt-8 grid grid-cols-3 gap-4 text-center text-[10px] text-slate-800 font-sans">
           <div>
             <div className="border-t border-slate-500 pt-1 font-bold">Prepared By / Assistant</div>
-            <span>DDO Office {employee.taluka}</span>
+            <span>DDO Office {pensionerTaluka}</span>
           </div>
           <div>
             <div className="border-t border-slate-500 pt-1 font-bold">Verified by DDO</div>
-            <span>{employee.ddoFirstLine}</span>
+            <span>{pensionerDdoTitle}</span>
           </div>
           <div>
             <div className="border-t border-slate-500 pt-1 font-bold">District Accounts Officer</div>
-            <span>DAO {employee.district?.replace('_', ' ')}</span>
+            <span>DAO {pensionerDistrict}</span>
           </div>
         </div>
       </div>
@@ -255,7 +288,7 @@ export const PensionPapersGenerator: React.FC<Props> = ({ employee }) => {
           Government of Sindh
         </h2>
         <p className="text-xs font-semibold text-slate-700 uppercase tracking-wide font-sans">
-          School Education & Literacy Department &bull; District Accounts Office {employee.district?.replace('_', ' ') || 'Sindh'}
+          School Education & Literacy Department &bull; District Accounts Office {pensionerDistrict || 'Sindh'}
         </p>
         <p className="text-[11px] font-bold text-purple-900 font-sans uppercase">
           FORM 1: APPLICATION FOR PENSION / COMMUTATION (PART I - IV) (PAGE 2 OF 4)
@@ -268,14 +301,14 @@ export const PensionPapersGenerator: React.FC<Props> = ({ employee }) => {
         </p>
 
         <div className="grid grid-cols-2 gap-x-4 gap-y-2 border border-slate-300 p-3 rounded-lg">
-          <div><strong>1. Name of Applicant:</strong> {employee.name}</div>
-          <div><strong>2. Father's Name:</strong> {employee.fatherName}</div>
-          <div><strong>3. Post & BPS:</strong> {employee.designation} (BPS-{employee.bps})</div>
-          <div><strong>4. Personnel SAP No:</strong> {employee.personnelId}</div>
-          <div><strong>5. CNIC Number:</strong> {employee.cnic}</div>
-          <div><strong>6. Permanent Address:</strong> Taluka {employee.taluka}, District {employee.district?.replace('_', ' ')}</div>
+          <div><strong>1. Name of Applicant:</strong> {pensionerName}</div>
+          <div><strong>2. Father's Name:</strong> {pensionerFatherName}</div>
+          <div><strong>3. Post & BPS:</strong> {pensionerDesignation} (BPS-{pensionerBps})</div>
+          <div><strong>4. Personnel SAP No:</strong> {pensionerPersonnelId}</div>
+          <div><strong>5. CNIC Number:</strong> {pensionerCnic}</div>
+          <div><strong>6. Permanent Address:</strong> Taluka {pensionerTaluka}, District {pensionerDistrict}</div>
           <div><strong>7. Date of Birth:</strong> {dateOfBirth}</div>
-          <div><strong>8. Date of Joining:</strong> {employee.appointmentDate}</div>
+          <div><strong>8. Date of Joining:</strong> {pensionerDateOfJoining}</div>
           <div><strong>9. Date of Retirement:</strong> {dateOfRetirement}</div>
           <div><strong>10. Total Length of Service:</strong> {qualifyingYears} Years</div>
           <div><strong>11. Option for Commutation:</strong> {commutationPercentage}% Commutation</div>
@@ -292,7 +325,7 @@ export const PensionPapersGenerator: React.FC<Props> = ({ employee }) => {
             <div>Date: <strong>{new Date().toLocaleDateString('en-GB')}</strong></div>
             <div className="text-right">
               <div className="font-bold border-t border-slate-500 pt-1">Signature of Retiring Civil Servant</div>
-              <span>{employee.name}</span>
+              <span>{pensionerName}</span>
             </div>
           </div>
         </div>
@@ -300,13 +333,13 @@ export const PensionPapersGenerator: React.FC<Props> = ({ employee }) => {
         <div className="pt-8 border-t border-slate-300">
           <div className="font-bold text-xs uppercase text-slate-800 mb-2">Part II - Verification by Head of Office / DDO</div>
           <p className="text-[11px] text-slate-700 italic">
-            Certified that the service of Mr./Ms. {employee.name} has been thoroughly verified from the original Service Book and no departmental inquiry or audit recovery is pending against him/her.
+            Certified that the service of Mr./Ms. {pensionerName} has been thoroughly verified from the original Service Book and no departmental inquiry or audit recovery is pending against him/her.
           </p>
           <div className="flex justify-between pt-6 font-sans text-xs">
             <div>Official Stamp</div>
             <div className="text-right">
               <div className="font-bold border-t border-slate-500 pt-1">Drawing & Disbursing Officer (DDO)</div>
-              <span>{employee.ddoFirstLine}</span>
+              <span>{pensionerDdoTitle}</span>
             </div>
           </div>
         </div>
@@ -328,7 +361,7 @@ export const PensionPapersGenerator: React.FC<Props> = ({ employee }) => {
           Government of Sindh
         </h2>
         <p className="text-xs font-semibold text-slate-700 uppercase tracking-wide font-sans">
-          School Education & Literacy Department &bull; Office of the District Education Officer {employee.district?.replace('_', ' ') || 'Sindh'}
+          School Education & Literacy Department &bull; Office of the District Education Officer {pensionerDistrict || 'Sindh'}
         </p>
         <p className="text-[11px] font-bold text-purple-900 font-sans uppercase">
           PENSION & 35% COMMUTATION FORMAL SANCTION ORDER (PAGE 3 OF 4)
@@ -346,7 +379,7 @@ export const PensionPapersGenerator: React.FC<Props> = ({ employee }) => {
         </div>
 
         <p className="text-justify indent-6">
-          Sanction is hereby accorded under Rule 3.5 of the Sindh Civil Servants (Pension) Rules to the grant of <strong>{retirementType}</strong> in respect of <strong>Mr./Ms. {employee.name}</strong>, {employee.designation} (BPS-{employee.bps}), School {employee.schoolName}, Personnel No. {employee.personnelId}, CNIC No. {employee.cnic}, with effect from <strong>{dateOfRetirement}</strong>.
+          Sanction is hereby accorded under Rule 3.5 of the Sindh Civil Servants (Pension) Rules to the grant of <strong>{retirementType}</strong> in respect of <strong>Mr./Ms. {pensionerName}</strong>, {pensionerDesignation} (BPS-{pensionerBps}), School {pensionerSchool}, Personnel No. {pensionerPersonnelId}, CNIC No. {pensionerCnic}, with effect from <strong>{dateOfRetirement}</strong>.
         </p>
 
         <p className="text-justify indent-6">
@@ -370,23 +403,23 @@ export const PensionPapersGenerator: React.FC<Props> = ({ employee }) => {
         </div>
 
         <p className="text-justify indent-6">
-          The expenditure involved is debitable under Major Head "SC21124 (124) - Administration of Secondary Education" under District Accounts Office {employee.district?.replace('_', ' ')}.
+          The expenditure involved is debitable under Major Head "SC21124 (124) - Administration of Secondary Education" under District Accounts Office {pensionerDistrict}.
         </p>
 
         <div className="pt-10 flex justify-end font-sans">
           <div className="text-center w-64">
             <div className="border-t border-slate-800 pt-1 font-bold">DISTRICT EDUCATION OFFICER</div>
             <div className="text-slate-600 text-[11px]">Elementary, Secondary & Higher Secondary</div>
-            <div className="text-slate-600 text-[11px]">{employee.district?.replace('_', ' ')}</div>
+            <div className="text-slate-600 text-[11px]">{pensionerDistrict}</div>
           </div>
         </div>
 
         <div className="pt-4 border-t border-slate-200 text-[10px] font-sans text-slate-600 space-y-0.5">
           <div className="font-bold">Copy forwarded for information and necessary action to:</div>
-          <div>1. The Accountant General Sindh / District Accounts Officer, {employee.district?.replace('_', ' ')}.</div>
-          <div>2. The Taluka Education Officer (TEO), {employee.taluka}.</div>
-          <div>3. The Head Master / DDO concerned.</div>
-          <div>4. The Official concerned.</div>
+          <div>1. The Accountant General Sindh / District Accounts Officer, {pensionerDistrict}.</div>
+          <div>2. The Taluka Education Officer (TEO), {pensionerTaluka}.</div>
+          <div>3. The Head Master / DDO concerned ({pensionerDdoTitle}).</div>
+          <div>4. The Official concerned (Mr./Ms. {pensionerName}).</div>
         </div>
       </div>
     </div>
@@ -406,7 +439,7 @@ export const PensionPapersGenerator: React.FC<Props> = ({ employee }) => {
           Government of Sindh
         </h2>
         <p className="text-xs font-semibold text-slate-700 uppercase tracking-wide font-sans">
-          School Education & Literacy Department &bull; District Accounts Office {employee.district?.replace('_', ' ') || 'Sindh'}
+          School Education & Literacy Department &bull; District Accounts Office {pensionerDistrict || 'Sindh'}
         </p>
         <p className="text-[11px] font-bold text-purple-900 font-sans uppercase">
           BILL FOR ENCASHMENT OF L.P.R (365 DAYS PROFORMA) (PAGE 4 OF 4)
@@ -419,7 +452,7 @@ export const PensionPapersGenerator: React.FC<Props> = ({ employee }) => {
         </div>
 
         <p className="text-justify indent-6">
-          Certified that <strong>Mr./Ms. {employee.name}</strong>, {employee.designation} (BPS-{employee.bps}), has applied for 365 days encashment of Leave Preparatory to Retirement (LPR) in lieu of 365 days leave on full pay as admissible under the Sindh Revised Leave Rules 1986.
+          Certified that <strong>Mr./Ms. {pensionerName}</strong>, {pensionerDesignation} (BPS-{pensionerBps}), has applied for 365 days encashment of Leave Preparatory to Retirement (LPR) in lieu of 365 days leave on full pay as admissible under the Sindh Revised Leave Rules 1986.
         </p>
 
         <table className="w-full border-collapse border border-slate-400 text-xs font-sans my-4">
@@ -450,17 +483,17 @@ export const PensionPapersGenerator: React.FC<Props> = ({ employee }) => {
         <div className="pt-8 flex justify-between font-sans text-xs">
           <div>
             <div className="font-bold border-t border-slate-600 pt-1">Signature of Claimant</div>
-            <span>{employee.name}</span>
+            <span>{pensionerName}</span>
           </div>
           <div className="text-right">
             <div className="font-bold border-t border-slate-600 pt-1">Drawing & Disbursing Officer (DDO)</div>
-            <span>{employee.ddoFirstLine}</span>
+            <span>{pensionerDdoTitle}</span>
           </div>
         </div>
 
         <div className="pt-8 text-center font-sans text-xs">
           <div className="inline-block border-t border-slate-600 pt-1 px-8 font-bold">
-            Passed for Payment by District Accounts Office {employee.district?.replace('_', ' ')}
+            Passed for Payment by District Accounts Office {pensionerDistrict}
           </div>
         </div>
       </div>
@@ -518,12 +551,183 @@ export const PensionPapersGenerator: React.FC<Props> = ({ employee }) => {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         
         {/* LEFT COLUMN: Input Form Panel */}
-        <div className="lg:col-span-5 bg-white border border-slate-200 rounded-2xl p-5 shadow-sm space-y-5">
+        <div className="lg:col-span-5 space-y-4">
+
+          {/* PENSIONER MANUAL PARTICULARS (INDEPENDENT) */}
+          <div className="bg-white border border-slate-200 rounded-2xl p-4 sm:p-5 shadow-sm space-y-3.5">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">
+              <div className="flex items-center space-x-2">
+                <div className="w-7 h-7 rounded-lg bg-purple-50 border border-purple-200 text-purple-700 flex items-center justify-center">
+                  <User className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-xs sm:text-sm text-slate-900">Pensioner Particulars</h3>
+                  <p className="text-[10px] text-slate-500">Edit fields directly according to your pension documents</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={handleCopyFromArrears}
+                className="px-2 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-[10px] font-semibold flex items-center space-x-1 cursor-pointer transition"
+                title="Optionally copy current details from Arrears form"
+              >
+                <RefreshCw className="w-3 h-3" />
+                <span>Sync with Arrears</span>
+              </button>
+            </div>
+
+            <div className="space-y-3 text-xs">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                <div>
+                  <label className="block font-semibold text-slate-700 mb-1 text-[11px]">Full Name</label>
+                  <input
+                    type="text"
+                    value={pensionerName}
+                    onChange={(e) => setPensionerName(e.target.value)}
+                    placeholder="e.g. Muhammad Ali"
+                    className="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-300 rounded-lg focus:bg-white text-slate-900 font-semibold"
+                  />
+                </div>
+                <div>
+                  <label className="block font-semibold text-slate-700 mb-1 text-[11px]">Father's / Husband's Name</label>
+                  <input
+                    type="text"
+                    value={pensionerFatherName}
+                    onChange={(e) => setPensionerFatherName(e.target.value)}
+                    placeholder="e.g. Ghulam Rasool"
+                    className="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-300 rounded-lg focus:bg-white text-slate-900 font-medium"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                <div className="sm:col-span-2">
+                  <label className="block font-semibold text-slate-700 mb-1 text-[11px]">Designation</label>
+                  <input
+                    type="text"
+                    value={pensionerDesignation}
+                    onChange={(e) => setPensionerDesignation(e.target.value)}
+                    placeholder="e.g. Primary School Teacher (PST)"
+                    className="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-300 rounded-lg focus:bg-white text-slate-900 font-medium"
+                  />
+                </div>
+                <div>
+                  <label className="block font-semibold text-slate-700 mb-1 text-[11px]">BPS Grade</label>
+                  <select
+                    value={pensionerBps}
+                    onChange={(e) => setPensionerBps(e.target.value)}
+                    className="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-300 rounded-lg focus:bg-white text-slate-900 font-bold"
+                  >
+                    <option value={14}>BPS-14</option>
+                    <option value={16}>BPS-16</option>
+                    <option value={9}>BPS-09</option>
+                    <option value={11}>BPS-11</option>
+                    <option value={15}>BPS-15</option>
+                    <option value={17}>BPS-17</option>
+                    <option value={18}>BPS-18</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                <div>
+                  <label className="block font-semibold text-slate-700 mb-1 text-[11px]">Personnel SAP No.</label>
+                  <input
+                    type="text"
+                    value={pensionerPersonnelId}
+                    onChange={(e) => setPensionerPersonnelId(e.target.value)}
+                    placeholder="e.g. 10845920"
+                    className="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-300 rounded-lg focus:bg-white text-slate-900 font-mono"
+                  />
+                </div>
+                <div>
+                  <label className="block font-semibold text-slate-700 mb-1 text-[11px]">CNIC No.</label>
+                  <input
+                    type="text"
+                    value={pensionerCnic}
+                    onChange={(e) => setPensionerCnic(e.target.value)}
+                    placeholder="e.g. 41303-1234567-1"
+                    className="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-300 rounded-lg focus:bg-white text-slate-900 font-mono"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                <div className="sm:col-span-2">
+                  <label className="block font-semibold text-slate-700 mb-1 text-[11px]">School / Station</label>
+                  <input
+                    type="text"
+                    value={pensionerSchool}
+                    onChange={(e) => setPensionerSchool(e.target.value)}
+                    placeholder="e.g. Govt. Boys Primary School"
+                    className="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-300 rounded-lg focus:bg-white text-slate-900 font-medium"
+                  />
+                </div>
+                <div>
+                  <label className="block font-semibold text-slate-700 mb-1 text-[11px]">SEMIS Code</label>
+                  <input
+                    type="text"
+                    value={pensionerSemis}
+                    onChange={(e) => setPensionerSemis(e.target.value)}
+                    placeholder="e.g. 403010123"
+                    className="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-300 rounded-lg focus:bg-white text-slate-900 font-mono"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                <div>
+                  <label className="block font-semibold text-slate-700 mb-1 text-[11px]">District</label>
+                  <input
+                    type="text"
+                    value={pensionerDistrict}
+                    onChange={(e) => setPensionerDistrict(e.target.value)}
+                    placeholder="e.g. Hyderabad"
+                    className="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-300 rounded-lg focus:bg-white text-slate-900"
+                  />
+                </div>
+                <div>
+                  <label className="block font-semibold text-slate-700 mb-1 text-[11px]">Taluka</label>
+                  <input
+                    type="text"
+                    value={pensionerTaluka}
+                    onChange={(e) => setPensionerTaluka(e.target.value)}
+                    placeholder="e.g. Hyderabad Rural"
+                    className="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-300 rounded-lg focus:bg-white text-slate-900"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                <div>
+                  <label className="block font-semibold text-slate-700 mb-1 text-[11px]">Date of Joining Service</label>
+                  <input
+                    type="date"
+                    value={pensionerDateOfJoining}
+                    onChange={(e) => setPensionerDateOfJoining(e.target.value)}
+                    className="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-300 rounded-lg focus:bg-white text-slate-900"
+                  />
+                </div>
+                <div>
+                  <label className="block font-semibold text-slate-700 mb-1 text-[11px]">DDO Title</label>
+                  <input
+                    type="text"
+                    value={pensionerDdoTitle}
+                    onChange={(e) => setPensionerDdoTitle(e.target.value)}
+                    placeholder="e.g. TEO Primary Male"
+                    className="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-300 rounded-lg focus:bg-white text-slate-900 font-medium"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm space-y-5">
           <div className="flex items-center justify-between border-b border-slate-100 pb-3">
             <div className="flex items-center space-x-2">
               <Calculator className="w-5 h-5 text-indigo-600" />
               <h3 className="font-bold text-sm text-slate-900">
-                Pension Calculation & Parameters
+                Pension Calculation &amp; Parameters
               </h3>
             </div>
             <span className="text-[11px] font-semibold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-lg border border-indigo-100">
@@ -685,6 +889,7 @@ export const PensionPapersGenerator: React.FC<Props> = ({ employee }) => {
               />
             </div>
           </div>
+        </div>
 
           {/* Quick Summary Card */}
           <div className="bg-slate-900 rounded-xl p-4 text-white space-y-2">

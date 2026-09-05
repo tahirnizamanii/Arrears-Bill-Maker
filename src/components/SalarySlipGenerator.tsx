@@ -19,6 +19,7 @@ import {
   Landmark,
   Calendar,
   Layers,
+  RefreshCw,
 } from 'lucide-react';
 
 interface Props {
@@ -128,6 +129,25 @@ export const SalarySlipGenerator: React.FC<Props> = ({ employee, adminConfig }) 
   // PDF Export & Mobile Preview View State
   const [isExportingPDF, setIsExportingPDF] = useState<boolean>(false);
   const [previewViewMode, setPreviewViewMode] = useState<'a4' | 'fit'>('a4');
+
+  // Manual Sync helper to optionally populate from Arrears employee data
+  const handleSyncFromArrears = () => {
+    if (employee) {
+      setEmpName(employee.name || '');
+      setFatherName(employee.fatherName || '');
+      setPersonnelNo(employee.personnelId || '');
+      setCnic(employee.cnic || '');
+      setDob(employee.dob || '');
+      setEntryService(employee.appointmentDate || '');
+      setDesignation(employee.designation || 'PRIMARY SCHOOL TEACHER');
+      setDdoCodeFull(employee.ddoCode ? `${employee.ddoCode}-TEO HYDERABAD TALUKA (F) P` : 'HB0380-TEO HYDERABAD TALUKA (F) P');
+      setDistrictOffice(employee.district ? `District Accounts Office ${employee.district}` : 'District Accounts Office Hyderabad');
+      setAccountNumber(employee.bankAccount || '');
+      setBankDetails(employee.bankName ? `${employee.bankName}, ${employee.bankBranch || 'BRANCH'}` : '');
+      setCity(employee.district || 'HYDERABAD');
+      setBpsGrade(employee.bps === 16 ? 16 : 14);
+    }
+  };
 
   // Synchronize dynamic defaults when BPS changes
   useEffect(() => {
@@ -567,10 +587,21 @@ export const SalarySlipGenerator: React.FC<Props> = ({ employee, adminConfig }) 
 
           {/* Card 2: Personal & Official Particulars */}
           <div className="bg-white rounded-2xl p-4 sm:p-5 shadow-sm border border-slate-200 space-y-3">
-            <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center space-x-1.5 border-b border-slate-100 pb-2">
-              <User className="w-4 h-4 text-emerald-600" />
-              <span>Official Employee Information</span>
-            </h3>
+            <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+              <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center space-x-1.5">
+                <User className="w-4 h-4 text-emerald-600" />
+                <span>Official Employee Information</span>
+              </h3>
+              <button
+                type="button"
+                onClick={handleSyncFromArrears}
+                className="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-[10px] font-semibold flex items-center space-x-1 cursor-pointer transition shadow-xs"
+                title="Optionally copy current details from Arrears form"
+              >
+                <RefreshCw className="w-3 h-3" />
+                <span>Sync with Arrears</span>
+              </button>
+            </div>
 
             <div className="grid grid-cols-2 gap-2.5 text-xs">
               <div className="col-span-2">
@@ -595,12 +626,23 @@ export const SalarySlipGenerator: React.FC<Props> = ({ employee, adminConfig }) 
 
               <div>
                 <label className="block text-slate-600 font-medium mb-0.5">Father / Husband Name</label>
-                <input
-                  type="text"
-                  value={fatherName}
-                  onChange={(e) => setFatherName(e.target.value)}
-                  className="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-300 rounded-lg font-bold text-slate-900"
-                />
+                <div className="flex space-x-1.5">
+                  <select
+                    value={relationType}
+                    onChange={(e) => setRelationType(e.target.value)}
+                    className="w-16 px-1.5 py-1.5 bg-slate-50 border border-slate-300 rounded-lg font-bold text-slate-900 text-xs"
+                  >
+                    <option value="S/o">S/o</option>
+                    <option value="D/o">D/o</option>
+                    <option value="W/o">W/o</option>
+                  </select>
+                  <input
+                    type="text"
+                    value={fatherName}
+                    onChange={(e) => setFatherName(e.target.value)}
+                    className="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-300 rounded-lg font-bold text-slate-900"
+                  />
+                </div>
               </div>
 
               <div>
@@ -643,6 +685,26 @@ export const SalarySlipGenerator: React.FC<Props> = ({ employee, adminConfig }) 
                 />
               </div>
 
+              <div>
+                <label className="block text-slate-600 font-medium mb-0.5">NTN Number</label>
+                <input
+                  type="text"
+                  value={ntn}
+                  onChange={(e) => setNtn(e.target.value)}
+                  className="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-300 rounded-lg font-mono font-bold text-slate-900"
+                />
+              </div>
+
+              <div>
+                <label className="block text-slate-600 font-medium mb-0.5">Length of Service</label>
+                <input
+                  type="text"
+                  value={lengthOfService}
+                  onChange={(e) => setLengthOfService(e.target.value)}
+                  className="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-300 rounded-lg font-bold text-slate-900"
+                />
+              </div>
+
               <div className="col-span-2">
                 <label className="block text-slate-600 font-medium mb-0.5">Designation</label>
                 <input
@@ -650,6 +712,16 @@ export const SalarySlipGenerator: React.FC<Props> = ({ employee, adminConfig }) 
                   value={designation}
                   onChange={(e) => setDesignation(e.target.value)}
                   className="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-300 rounded-lg font-bold text-slate-900"
+                />
+              </div>
+
+              <div className="col-span-2">
+                <label className="block text-slate-600 font-medium mb-0.5">Employment Category</label>
+                <input
+                  type="text"
+                  value={employmentCategory}
+                  onChange={(e) => setEmploymentCategory(e.target.value)}
+                  className="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-300 rounded-lg font-semibold text-slate-900"
                 />
               </div>
 
@@ -685,7 +757,87 @@ export const SalarySlipGenerator: React.FC<Props> = ({ employee, adminConfig }) 
             </div>
           </div>
 
-          {/* Card 3: Bank & Account Details */}
+          {/* Card 3: Department & GPF Particulars */}
+          <div className="bg-white rounded-2xl p-4 sm:p-5 shadow-sm border border-slate-200 space-y-3">
+            <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center space-x-1.5 border-b border-slate-100 pb-2">
+              <Building className="w-4 h-4 text-amber-600" />
+              <span>Department &amp; GPF Details</span>
+            </h3>
+
+            <div className="grid grid-cols-2 gap-2.5 text-xs">
+              <div className="col-span-2">
+                <label className="block text-slate-600 font-medium mb-0.5">Department Name / Code</label>
+                <input
+                  type="text"
+                  value={departmentName}
+                  onChange={(e) => setDepartmentName(e.target.value)}
+                  className="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-300 rounded-lg font-semibold text-slate-900"
+                />
+              </div>
+
+              <div>
+                <label className="block text-slate-600 font-medium mb-0.5">Payroll Section</label>
+                <input
+                  type="text"
+                  value={payrollSection}
+                  onChange={(e) => setPayrollSection(e.target.value)}
+                  className="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-300 rounded-lg font-mono font-bold text-slate-900"
+                />
+              </div>
+
+              <div>
+                <label className="block text-slate-600 font-medium mb-0.5">GPF Section</label>
+                <input
+                  type="text"
+                  value={gpfSection}
+                  onChange={(e) => setGpfSection(e.target.value)}
+                  className="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-300 rounded-lg font-mono font-bold text-slate-900"
+                />
+              </div>
+
+              <div>
+                <label className="block text-slate-600 font-medium mb-0.5">Cash Center</label>
+                <input
+                  type="text"
+                  value={cashCenter}
+                  onChange={(e) => setCashCenter(e.target.value)}
+                  className="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-300 rounded-lg font-mono font-bold text-slate-900"
+                />
+              </div>
+
+              <div>
+                <label className="block text-slate-600 font-medium mb-0.5">GPF A/C No.</label>
+                <input
+                  type="text"
+                  value={gpfAcNo}
+                  onChange={(e) => setGpfAcNo(e.target.value)}
+                  className="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-300 rounded-lg font-mono font-bold text-slate-900"
+                />
+              </div>
+
+              <div>
+                <label className="block text-slate-600 font-medium mb-0.5">GPF Interest Applied Status</label>
+                <input
+                  type="text"
+                  value={gpfInterestApplied}
+                  onChange={(e) => setGpfInterestApplied(e.target.value)}
+                  className="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-300 rounded-lg font-semibold text-slate-900"
+                />
+              </div>
+
+              <div>
+                <label className="block text-slate-600 font-medium mb-0.5">Vendor Number</label>
+                <input
+                  type="text"
+                  value={vendorNumber}
+                  onChange={(e) => setVendorNumber(e.target.value)}
+                  className="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-300 rounded-lg font-mono font-bold text-slate-900"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Card 4: Bank & Account Details */}
           <div className="bg-white rounded-2xl p-4 sm:p-5 shadow-sm border border-slate-200 space-y-3">
             <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center space-x-1.5 border-b border-slate-100 pb-2">
               <Landmark className="w-4 h-4 text-blue-600" />
@@ -709,6 +861,180 @@ export const SalarySlipGenerator: React.FC<Props> = ({ employee, adminConfig }) 
                   value={bankDetails}
                   onChange={(e) => setBankDetails(e.target.value)}
                   className="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-300 rounded-lg font-medium text-slate-900"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Card 5: Leaves & Attendance Record */}
+          <div className="bg-white rounded-2xl p-4 sm:p-5 shadow-sm border border-slate-200 space-y-3">
+            <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center space-x-1.5 border-b border-slate-100 pb-2">
+              <Calendar className="w-4 h-4 text-teal-600" />
+              <span>Leaves &amp; Attendance Record</span>
+            </h3>
+
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
+              <div>
+                <label className="block text-slate-600 font-medium mb-0.5">Opening Balance</label>
+                <input
+                  type="text"
+                  value={leavesOpening}
+                  onChange={(e) => setLeavesOpening(e.target.value)}
+                  className="w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded-lg font-mono font-bold text-slate-900 text-center"
+                />
+              </div>
+              <div>
+                <label className="block text-slate-600 font-medium mb-0.5">Availed</label>
+                <input
+                  type="text"
+                  value={leavesAvailed}
+                  onChange={(e) => setLeavesAvailed(e.target.value)}
+                  className="w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded-lg font-mono font-bold text-slate-900 text-center"
+                />
+              </div>
+              <div>
+                <label className="block text-slate-600 font-medium mb-0.5">Earned</label>
+                <input
+                  type="text"
+                  value={leavesEarned}
+                  onChange={(e) => setLeavesEarned(e.target.value)}
+                  className="w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded-lg font-mono font-bold text-slate-900 text-center"
+                />
+              </div>
+              <div>
+                <label className="block text-slate-600 font-medium mb-0.5">Leaves Balance</label>
+                <input
+                  type="text"
+                  value={leavesBalance}
+                  onChange={(e) => setLeavesBalance(e.target.value)}
+                  className="w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded-lg font-mono font-bold text-slate-900 text-center"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Card 6: Address & Domicile Particulars */}
+          <div className="bg-white rounded-2xl p-4 sm:p-5 shadow-sm border border-slate-200 space-y-3">
+            <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center space-x-1.5 border-b border-slate-100 pb-2">
+              <MapPin className="w-4 h-4 text-rose-600" />
+              <span>Address &amp; Domicile Particulars</span>
+            </h3>
+
+            <div className="grid grid-cols-2 gap-2.5 text-xs">
+              <div className="col-span-2">
+                <label className="block text-slate-600 font-medium mb-0.5">Permanent Address</label>
+                <input
+                  type="text"
+                  value={permanentAddress}
+                  onChange={(e) => setPermanentAddress(e.target.value)}
+                  className="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-300 rounded-lg font-medium text-slate-900"
+                />
+              </div>
+
+              <div>
+                <label className="block text-slate-600 font-medium mb-0.5">City</label>
+                <input
+                  type="text"
+                  value={city}
+                  onChange={(e) => setCity(e.target.value)}
+                  className="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-300 rounded-lg font-bold text-slate-900"
+                />
+              </div>
+
+              <div>
+                <label className="block text-slate-600 font-medium mb-0.5">Domicile</label>
+                <input
+                  type="text"
+                  value={domicile}
+                  onChange={(e) => setDomicile(e.target.value)}
+                  className="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-300 rounded-lg font-bold text-slate-900"
+                />
+              </div>
+
+              <div className="col-span-2">
+                <label className="block text-slate-600 font-medium mb-0.5">Housing Status</label>
+                <input
+                  type="text"
+                  value={housingStatus}
+                  onChange={(e) => setHousingStatus(e.target.value)}
+                  className="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-300 rounded-lg font-semibold text-slate-900"
+                />
+              </div>
+
+              <div className="col-span-2">
+                <label className="block text-slate-600 font-medium mb-0.5">Temporary Address</label>
+                <input
+                  type="text"
+                  value={tempAddress}
+                  onChange={(e) => setTempAddress(e.target.value)}
+                  className="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-300 rounded-lg font-medium text-slate-900"
+                />
+              </div>
+
+              <div>
+                <label className="block text-slate-600 font-medium mb-0.5">Temporary City</label>
+                <input
+                  type="text"
+                  value={tempCity}
+                  onChange={(e) => setTempCity(e.target.value)}
+                  className="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-300 rounded-lg font-bold text-slate-900"
+                />
+              </div>
+
+              <div>
+                <label className="block text-slate-600 font-medium mb-0.5">Email</label>
+                <input
+                  type="text"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-300 rounded-lg font-medium text-slate-900"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Card 7: Income Tax Details */}
+          <div className="bg-white rounded-2xl p-4 sm:p-5 shadow-sm border border-slate-200 space-y-3">
+            <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center space-x-1.5 border-b border-slate-100 pb-2">
+              <FileText className="w-4 h-4 text-indigo-600" />
+              <span>Income Tax Particulars</span>
+            </h3>
+
+            <div className="grid grid-cols-2 gap-2 text-xs">
+              <div>
+                <label className="block text-slate-600 font-medium mb-0.5">Tax Payable (Rs.)</label>
+                <input
+                  type="number"
+                  value={taxPayable}
+                  onChange={(e) => setTaxPayable(Number(e.target.value) || 0)}
+                  className="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-300 rounded-lg font-mono font-bold text-slate-900"
+                />
+              </div>
+              <div>
+                <label className="block text-slate-600 font-medium mb-0.5">Tax Recovered (Rs.)</label>
+                <input
+                  type="number"
+                  value={taxRecovered}
+                  onChange={(e) => setTaxRecovered(Number(e.target.value) || 0)}
+                  className="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-300 rounded-lg font-mono font-bold text-slate-900"
+                />
+              </div>
+              <div>
+                <label className="block text-slate-600 font-medium mb-0.5">Tax Exempted (Rs.)</label>
+                <input
+                  type="number"
+                  value={taxExempted}
+                  onChange={(e) => setTaxExempted(Number(e.target.value) || 0)}
+                  className="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-300 rounded-lg font-mono font-bold text-slate-900"
+                />
+              </div>
+              <div>
+                <label className="block text-slate-600 font-medium mb-0.5">Tax Recoverable (Rs.)</label>
+                <input
+                  type="number"
+                  value={taxRecoverable}
+                  onChange={(e) => setTaxRecoverable(Number(e.target.value) || 0)}
+                  className="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-300 rounded-lg font-mono font-bold text-slate-900"
                 />
               </div>
             </div>
@@ -863,10 +1189,10 @@ export const SalarySlipGenerator: React.FC<Props> = ({ employee, adminConfig }) 
           </div>
 
           {/* DOCUMENT PREVIEW CONTAINER - RESPONSIVE HORIZONTAL SCROLL & EXACT A4 SIZING */}
-          <div className="w-full overflow-x-auto bg-slate-900/40 p-2 sm:p-4 rounded-2xl border border-slate-700/60 shadow-inner flex justify-start lg:justify-center">
+          <div className="w-full overflow-x-auto bg-slate-900/40 p-2 sm:p-4 rounded-2xl border border-slate-700/60 shadow-inner flex justify-center">
             <div
               id="official-salary-slip-document"
-              className={`bg-white text-black p-5 sm:p-7 md:p-8 shadow-2xl border border-slate-300 shrink-0 rounded-none print:shadow-none print:border-none print:p-0 print:w-full transition-transform origin-top-left ${
+              className={`bg-white text-black p-5 sm:p-7 md:p-8 shadow-2xl border border-slate-300 shrink-0 rounded-none print:shadow-none print:border-none print:p-0 print:w-full transition-transform origin-top-left mx-auto ${
                 previewViewMode === 'fit' ? 'w-full min-w-0 sm:w-[780px] sm:min-w-[780px]' : 'w-[780px] min-w-[780px]'
               }`}
               style={{
@@ -876,14 +1202,14 @@ export const SalarySlipGenerator: React.FC<Props> = ({ employee, adminConfig }) 
               }}
             >
               {/* 1. TOP HEADER SECTION */}
-              <div className="relative mb-3 pb-0.5 border-b border-black">
+              <div className="relative mb-3 pb-1 border-b border-black">
                 {/* Emblem at top right matching document */}
                 <div className="absolute right-0 top-0 w-14 h-14 sm:w-16 sm:h-16 flex items-center justify-center pointer-events-none">
                   <GovernmentEmblem className="w-full h-full object-contain" />
                 </div>
 
-                {/* Centered Government Headings */}
-                <div className="text-center pr-14 pl-2 sm:pr-16 sm:pl-4">
+                {/* Centered Government Headings - Equal padding on both sides for exact horizontal centering */}
+                <div className="text-center px-14 sm:px-16">
                   <h1 className="text-base sm:text-lg font-black tracking-wide uppercase text-black" style={{ fontFamily: "'Times New Roman', serif" }}>
                     Government of Sindh
                   </h1>
@@ -995,7 +1321,7 @@ export const SalarySlipGenerator: React.FC<Props> = ({ employee, adminConfig }) 
               </div>
 
               {/* 5. BOXED TABLE: PAY AND ALLOWANCES (2 Columns Layout) */}
-              <table className="w-full border-collapse border border-black text-[10.5px] mb-2.5 font-sans" style={{ fontFamily: "Arial, Helvetica, sans-serif" }}>
+              <table className="w-full table-fixed border-collapse border border-black text-[10.5px] mb-2.5 font-sans" style={{ fontFamily: "Arial, Helvetica, sans-serif" }}>
                 <thead>
                   <tr className="border-b border-black font-bold">
                     <th className="border-r border-black py-0.5 px-2 text-center w-[35%]">Wage type</th>
@@ -1008,11 +1334,11 @@ export const SalarySlipGenerator: React.FC<Props> = ({ employee, adminConfig }) 
                   {calculation.alignedAllowancesRows.map((row, idx) => (
                     <tr key={`allw_${idx}`} className="border-b border-black/40">
                       {/* Left Column */}
-                      <td className="border-r border-black py-0.5 px-2 text-left">
+                      <td className="border-r border-black py-0.5 px-2 text-left truncate">
                         {row.left ? (
                           <div className="flex items-center space-x-2">
                             <span className="font-mono">{row.left.code}</span>
-                            <span>{row.left.name}</span>
+                            <span className="truncate">{row.left.name}</span>
                           </div>
                         ) : null}
                       </td>
@@ -1021,11 +1347,11 @@ export const SalarySlipGenerator: React.FC<Props> = ({ employee, adminConfig }) 
                       </td>
 
                       {/* Right Column */}
-                      <td className="border-r border-black py-0.5 px-2 text-left">
+                      <td className="border-r border-black py-0.5 px-2 text-left truncate">
                         {row.right ? (
                           <div className="flex items-center space-x-2">
                             <span className="font-mono">{row.right.code}</span>
-                            <span>{row.right.name}</span>
+                            <span className="truncate">{row.right.name}</span>
                           </div>
                         ) : null}
                       </td>
@@ -1041,7 +1367,7 @@ export const SalarySlipGenerator: React.FC<Props> = ({ employee, adminConfig }) 
               <div className="font-bold text-black text-[11px] mb-0.5">
                 Deductions - General
               </div>
-              <table className="w-full border-collapse border border-black text-[10.5px] mb-2.5 font-sans" style={{ fontFamily: "Arial, Helvetica, sans-serif" }}>
+              <table className="w-full table-fixed border-collapse border border-black text-[10.5px] mb-2.5 font-sans" style={{ fontFamily: "Arial, Helvetica, sans-serif" }}>
                 <thead>
                   <tr className="border-b border-black font-bold">
                     <th className="border-r border-black py-0.5 px-2 text-center w-[35%]">Wage type</th>
@@ -1053,11 +1379,11 @@ export const SalarySlipGenerator: React.FC<Props> = ({ employee, adminConfig }) 
                 <tbody>
                   {calculation.alignedDeductionsRows.map((row, idx) => (
                     <tr key={`ded_${idx}`} className="border-b border-black/40">
-                      <td className="border-r border-black py-0.5 px-2 text-left">
+                      <td className="border-r border-black py-0.5 px-2 text-left truncate">
                         {row.left ? (
                           <div className="flex items-center space-x-2">
                             <span className="font-mono">{row.left.code}</span>
-                            <span>{row.left.name}</span>
+                            <span className="truncate">{row.left.name}</span>
                           </div>
                         ) : null}
                       </td>
@@ -1065,11 +1391,11 @@ export const SalarySlipGenerator: React.FC<Props> = ({ employee, adminConfig }) 
                         {row.left ? `-${row.left.amount.toLocaleString()}.00` : ''}
                       </td>
 
-                      <td className="border-r border-black py-0.5 px-2 text-left">
+                      <td className="border-r border-black py-0.5 px-2 text-left truncate">
                         {row.right ? (
                           <div className="flex items-center space-x-2">
                             <span className="font-mono">{row.right.code}</span>
-                            <span>{row.right.name}</span>
+                            <span className="truncate">{row.right.name}</span>
                           </div>
                         ) : null}
                       </td>
@@ -1085,7 +1411,7 @@ export const SalarySlipGenerator: React.FC<Props> = ({ employee, adminConfig }) 
               <div className="font-bold text-black text-[11px] mb-0.5">
                 Deductions - Loans and Advances
               </div>
-              <table className="w-full border-collapse border border-black text-[10.5px] mb-2.5 font-sans" style={{ fontFamily: "Arial, Helvetica, sans-serif" }}>
+              <table className="w-full table-fixed border-collapse border border-black text-[10.5px] mb-2.5 font-sans" style={{ fontFamily: "Arial, Helvetica, sans-serif" }}>
                 <thead>
                   <tr className="border-b border-black font-bold">
                     <th className="border-r border-black py-0.5 px-2 text-center w-[10%]">Loan</th>
@@ -1100,7 +1426,7 @@ export const SalarySlipGenerator: React.FC<Props> = ({ employee, adminConfig }) 
                     loans.map((l, idx) => (
                       <tr key={l.id} className="border-b border-black/40">
                         <td className="border-r border-black py-0.5 px-2 text-center font-mono">{l.loanCode || `0${idx + 1}`}</td>
-                        <td className="border-r border-black py-0.5 px-2 text-left">{l.description}</td>
+                        <td className="border-r border-black py-0.5 px-2 text-left truncate">{l.description}</td>
                         <td className="border-r border-black py-0.5 px-2 text-right font-mono">{l.principalAmount.toLocaleString()}.00</td>
                         <td className="border-r border-black py-0.5 px-2 text-right font-mono">-{l.monthlyDeduction.toLocaleString()}.00</td>
                         <td className="py-0.5 px-2 text-right font-mono">{l.balance.toLocaleString()}.00</td>
@@ -1122,7 +1448,7 @@ export const SalarySlipGenerator: React.FC<Props> = ({ employee, adminConfig }) 
               <div className="font-bold text-black text-[11px] mb-0.5">
                 Deductions - Income Tax
               </div>
-              <div className="flex flex-wrap items-center justify-between text-[10.5px] text-black mb-2">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-[10.5px] text-black mb-2">
                 <div>
                   <span className="font-bold">Payable: </span>
                   <span className="font-mono">{taxPayable.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
@@ -1142,16 +1468,16 @@ export const SalarySlipGenerator: React.FC<Props> = ({ employee, adminConfig }) 
               </div>
 
               {/* 9. GROSS PAY, DEDUCTIONS & NET PAY LINE */}
-              <div className="flex flex-wrap items-center justify-between text-[11.5px] font-bold text-black mb-2 py-1 border-y border-black">
-                <div>
+              <div className="grid grid-cols-3 text-[11.5px] font-bold text-black mb-2 py-1 border-y border-black">
+                <div className="text-left">
                   <span>Gross Pay (Rs.): </span>
                   <span className="font-mono font-bold ml-1">{calculation.grossPay.toLocaleString()}.00</span>
                 </div>
-                <div>
+                <div className="text-center">
                   <span>Deductions (Rs.): </span>
                   <span className="font-mono font-bold ml-1">-{calculation.totalDeductions.toLocaleString()}.00</span>
                 </div>
-                <div>
+                <div className="text-right">
                   <span>Net Pay (Rs.): </span>
                   <span className="font-mono font-bold ml-1">{calculation.netPay.toLocaleString()}.00</span>
                 </div>

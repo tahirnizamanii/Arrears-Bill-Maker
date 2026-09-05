@@ -121,10 +121,43 @@ function inlineComputedStyles(srcNode: Element, destNode: Element) {
     if (computed.left && computed.left !== 'auto') destEl.style.left = computed.left;
   }
 
-  // Dimensions
-  if (computed.width && computed.width !== 'auto') destEl.style.width = computed.width;
-  if (computed.height && computed.height !== 'auto') destEl.style.height = computed.height;
-  if (computed.minHeight && computed.minHeight !== '0px') destEl.style.minHeight = computed.minHeight;
+  // Dimensions: DO NOT inline computed pixel widths onto general block containers, paragraphs, or headings!
+  // Inlining resolved viewport/screen pixel widths (e.g., 520px from desktop columns or 360px from mobile)
+  // forcibly locks block elements to narrow widths, causing the exported A4 document to appear severely
+  // off-center with one side too close and the other side too far!
+  if (destEl.tagName === 'IMG' || destEl.tagName === 'CANVAS' || destEl.tagName === 'SVG') {
+    if (computed.width && computed.width !== 'auto') destEl.style.width = computed.width;
+    if (computed.height && computed.height !== 'auto') destEl.style.height = computed.height;
+  } else if (destEl.tagName === 'TABLE') {
+    destEl.style.width = '100%';
+  } else if (destEl.tagName === 'TD' || destEl.tagName === 'TH') {
+    // Preserve percentage width if present, else let table layout calculate naturally
+    if (srcEl.getAttribute('width')) {
+      destEl.style.width = srcEl.getAttribute('width')!;
+    }
+  } else {
+    // Normal block elements (div, p, header, section, etc.)
+    // Only inherit width if explicitly set in inline styles (e.g. w-64 signature block or percentage),
+    // NEVER from window.getComputedStyle() which returns responsive pixel values!
+    if (srcEl.style.width && srcEl.style.width !== 'auto') {
+      destEl.style.width = srcEl.style.width;
+    } else if (srcEl.className && srcEl.className.includes('w-64')) {
+      destEl.style.width = '16rem';
+    } else if (srcEl.className && srcEl.className.includes('w-1/2')) {
+      destEl.style.width = '50%';
+    } else if (srcEl.className && srcEl.className.includes('w-1/3')) {
+      destEl.style.width = '33.333%';
+    } else if (srcEl.className && srcEl.className.includes('w-full')) {
+      destEl.style.width = '100%';
+    }
+  }
+
+  if (computed.height && computed.height !== 'auto' && (destEl.tagName === 'IMG' || destEl.tagName === 'CANVAS' || destEl.tagName === 'SVG')) {
+    destEl.style.height = computed.height;
+  }
+  if (computed.minHeight && computed.minHeight !== '0px' && destEl.tagName !== 'DIV') {
+    destEl.style.minHeight = computed.minHeight;
+  }
 
   // Table collapse
   if (destEl.tagName === 'TABLE') {
@@ -281,7 +314,7 @@ export async function generateFullArrearsPDF(
         backgroundColor: '#ffffff',
         width: 794,
         height: pageHeight,
-        windowWidth: 1024,
+        windowWidth: 794,
         scrollX: 0,
         scrollY: 0,
         onclone: (clonedDoc) => {
@@ -455,7 +488,7 @@ export async function exportSingleDocumentToPDF(
     clone.style.width = '794px';
     clone.style.maxWidth = '794px';
     clone.style.minWidth = '794px';
-    clone.style.padding = '28px 32px';
+    clone.style.padding = '36px 44px';
     clone.style.border = 'none';
     clone.style.boxShadow = 'none';
     clone.style.backgroundColor = '#ffffff';
@@ -475,23 +508,42 @@ export async function exportSingleDocumentToPDF(
       backgroundColor: '#ffffff',
       width: 794,
       height: pageHeight,
-      windowWidth: 1024,
+      windowWidth: 794,
       scrollX: 0,
       scrollY: 0,
       onclone: (clonedDoc) => {
         const styleTag = clonedDoc.createElement('style');
         styleTag.textContent = `
           * { box-sizing: border-box !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-          #cloned-single-export-doc { width: 794px !important; max-width: 794px !important; min-width: 794px !important; margin: 0 auto !important; padding: 26px 30px !important; font-family: "Times New Roman", Times, serif !important; color: #000000 !important; background-color: #ffffff !important; }
+          #single-pdf-export-staging { width: 794px !important; margin: 0 auto !important; }
+          #cloned-single-export-doc {
+            width: 794px !important;
+            max-width: 794px !important;
+            min-width: 794px !important;
+            margin: 0 auto !important;
+            padding: 36px 44px !important;
+            box-sizing: border-box !important;
+            font-family: "Times New Roman", Times, serif !important;
+            color: #000000 !important;
+            background-color: #ffffff !important;
+          }
+          #cloned-single-export-doc > div {
+            width: 100% !important;
+            max-width: 100% !important;
+            box-sizing: border-box !important;
+          }
           table { width: 100% !important; border-collapse: collapse !important; border-spacing: 0 !important; font-family: Arial, Helvetica, sans-serif !important; }
           th, td { font-family: Arial, Helvetica, sans-serif !important; }
           .flex { display: flex !important; }
           .justify-between { justify-content: space-between !important; }
+          .justify-end { justify-content: flex-end !important; }
           .items-center { align-items: center !important; }
           .text-center { text-align: center !important; }
           .text-right { text-align: right !important; }
           .text-left { text-align: left !important; }
+          .text-justify { text-align: justify !important; }
           .font-mono { font-family: "Courier New", Courier, monospace !important; }
+          .w-full { width: 100% !important; }
         `;
         clonedDoc.head.appendChild(styleTag);
       },
@@ -655,7 +707,7 @@ export async function generateFullPensionPDF(options: PensionPDFExportOptions = 
         backgroundColor: '#ffffff',
         width: 794,
         height: pageHeight,
-        windowWidth: 1024,
+        windowWidth: 794,
         scrollX: 0,
         scrollY: 0,
         onclone: (clonedDoc) => {

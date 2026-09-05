@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <defs>
+    <linearGradient id="sindhGreen" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#047857" />
+      <stop offset="100%" stop-color="#064e3b" />
+    </linearGradient>
+    <linearGradient id="goldAccent" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fef08a" />
+      <stop offset="50%" stop-color="#f59e0b" />
+      <stop offset="100%" stop-color="#d97706" />
+    </linearGradient>
+    <filter id="subtleShadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="1.5" stdDeviation="1" flood-opacity="0.3" />
+    </filter>
+  </defs>
+
+  <!-- Circular Base Badge -->
+  <circle cx="32" cy="32" r="30" fill="url(#sindhGreen)" filter="url(#subtleShadow)" />
+  
+  <!-- Outer Gold Rim -->
+  <circle cx="32" cy="32" r="28.5" fill="none" stroke="url(#goldAccent)" stroke-width="1.5" stroke-dasharray="2 1" opacity="0.85" />
+  <circle cx="32" cy="32" r="26.5" fill="none" stroke="url(#goldAccent)" stroke-width="1.2" />
+
+  <!-- Laurel / Wheat Wreath Garland -->
+  <g stroke="url(#goldAccent)" stroke-width="1.2" fill="none" stroke-linecap="round">
+    <!-- Left branch -->
+    <path d="M14 36 C13 26 18 16 26 13" />
+    <path d="M13 32 Q10 30 13 28" fill="url(#goldAccent)" />
+    <path d="M15 25 Q12 23 15 21" fill="url(#goldAccent)" />
+    <path d="M19 19 Q16 16 20 15" fill="url(#goldAccent)" />
+    
+    <!-- Right branch -->
+    <path d="M50 36 C51 26 46 16 38 13" />
+    <path d="M51 32 Q54 30 51 28" fill="url(#goldAccent)" />
+    <path d="M49 25 Q52 23 49 21" fill="url(#goldAccent)" />
+    <path d="M45 19 Q48 16 44 15" fill="url(#goldAccent)" />
+  </g>
+
+  <!-- Crescent & Star (National / Sindh Seal Emblem) -->
+  <g transform="translate(32, 22) scale(0.72)">
+    <!-- Crescent Moon -->
+    <path d="M-2 -8 A 10 10 0 1 0 10 8 A 8 8 0 1 1 -2 -8 Z" fill="url(#goldAccent)" />
+    <!-- Five-pointed Star -->
+    <polygon points="5,-6 6.5,-2 10.5,-2 7.5,0.5 8.5,4.5 5,2 1.5,4.5 2.5,0.5 -0.5,-2 3.5,-2" fill="url(#goldAccent)" />
+  </g>
+
+  <!-- Open Book of Knowledge / Law & Finance Proforma Base -->
+  <g transform="translate(32, 42)">
+    <!-- Left page -->
+    <path d="M-13 -2 C-8 -4 -3 -3 0 0 L0 8 C-3 6 -8 5 -13 7 Z" fill="#ffffff" stroke="url(#goldAccent)" stroke-width="0.8" />
+    <!-- Right page -->
+    <path d="M13 -2 C8 -4 3 -3 0 0 L0 8 C3 6 8 5 13 7 Z" fill="#ffffff" stroke="url(#goldAccent)" stroke-width="0.8" />
+    <!-- Book lines -->
+    <line x1="-10" y1="0.5" x2="-3" y2="-0.5" stroke="#047857" stroke-width="0.7" stroke-linecap="round" />
+    <line x1="-10" y1="3" x2="-3" y2="2" stroke="#047857" stroke-width="0.7" stroke-linecap="round" />
+    <line x1="3" y1="-0.5" x2="10" y2="0.5" stroke="#047857" stroke-width="0.7" stroke-linecap="round" />
+    <line x1="3" y1="2" x2="10" y2="3" stroke="#047857" stroke-width="0.7" stroke-linecap="round" />
+    <!-- Center ribbon bookmark -->
+    <path d="M0 0 L0 10 L-1.5 8.5 L-3 10 L-3 0 Z" fill="url(#goldAccent)" />
+  </g>
+
+  <!-- Base Scroll Ribbon -->
+  <path d="M16 51 Q32 55 48 51 Q46 54 32 57 Q18 54 16 51 Z" fill="url(#goldAccent)" />
+</svg>

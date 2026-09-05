@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Adjustment Bill - Employee Details Section</title>
+  <style>
+    /* Reset & Base Styles */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: "Segoe UI", Inter, -apple-system, BlinkMacSystemFont, Arial, sans-serif;
+      background-color: #f1f5f9;
+      color: #0f172a;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      padding: 24px 16px;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    /* Screen Action Toolbar (Hidden during Print) */
+    .screen-toolbar {
+      width: 100%;
+      max-width: 800px;
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      border-radius: 12px;
+      padding: 12px 18px;
+      margin-bottom: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+    }
+
+    .screen-toolbar .title-area h2 {
+      font-size: 15px;
+      font-weight: 700;
+      color: #0f172a;
+    }
+
+    .screen-toolbar .title-area p {
+      font-size: 12px;
+      color: #64748b;
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 10px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 16px;
+      font-size: 13px;
+      font-weight: 600;
+      border-radius: 8px;
+      border: 1px solid transparent;
+      cursor: pointer;
+      transition: all 0.15s ease-in-out;
+      text-decoration: none;
+    }
+
+    .btn-primary {
+      background-color: #047857;
+      color: #ffffff;
+    }
+
+    .btn-primary:hover {
+      background-color: #065f46;
+    }
+
+    .btn-secondary {
+      background-color: #ffffff;
+      color: #334155;
+      border-color: #cbd5e1;
+    }
+
+    .btn-secondary:hover {
+      background-color: #f8fafc;
+      border-color: #94a3b8;
+    }
+
+    /* Print Paper Simulation Container */
+    .page-sheet {
+      width: 100%;
+      max-width: 800px;
+      background: #ffffff;
+      padding: 24px;
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.04);
+      border-radius: 4px;
+    }
+
+    /* Optional Form Header Context */
+    .form-header-banner {
+      background: #000000;
+      color: #ffffff;
+      text-align: center;
+      padding: 6px 10px;
+      font-weight: 800;
+      font-size: 13px;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      border: 2px solid #000000;
+      margin-bottom: 12px;
+    }
+
+    .section-title {
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #334155;
+      margin-bottom: 6px;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    /* 4-Column Grid Table */
+    .employee-details-table {
+      width: 100%;
+      border-collapse: collapse;
+      border: 1.5px solid #000000;
+      table-layout: fixed;
+      background: #ffffff;
+    }
+
+    .employee-details-table td {
+      border: 1px solid #000000;
+      padding: 7px 10px;
+      font-size: 13.5px;
+      line-height: 1.4;
+      vertical-align: middle;
+      color: #000000;
+    }
+
+    /* Column Widths (4 Equal / Balanced Columns) */
+    .employee-details-table col.col-1 { width: 28%; }
+    .employee-details-table col.col-2 { width: 26%; }
+    .employee-details-table col.col-3 { width: 23%; }
+    .employee-details-table col.col-4 { width: 23%; }
+
+    /* Field Labels */
+    .label {
+      font-weight: 600;
+      color: #111827;
+      font-size: 13px;
+      white-space: nowrap;
+    }
+
+    /* Pre-filled Distinct Value Styles */
+    .value {
+      font-weight: 700;
+      color: #000000;
+      margin-left: 6px;
+      font-size: 13.5px;
+      letter-spacing: 0.2px;
+    }
+
+    .value-mono {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-weight: 700;
+      font-size: 13px;
+    }
+
+    /* Handwriting Underline (Clean bottom line only, no box borders) */
+    .underline-blank {
+      display: inline-block;
+      min-width: 110px;
+      width: calc(100% - 75px);
+      border-bottom: 1.2px solid #000000;
+      margin-left: 6px;
+      height: 16px;
+      vertical-align: bottom;
+    }
+
+    .underline-blank-short {
+      display: inline-block;
+      min-width: 90px;
+      width: calc(100% - 50px);
+      border-bottom: 1.2px solid #000000;
+      margin-left: 6px;
+      height: 16px;
+      vertical-align: bottom;
+    }
+
+    /* Empty cells with subtle placeholder styling */
+    .empty-cell {
+      background-color: #ffffff;
+      min-height: 32px;
+    }
+
+    /* Print Specific Media Rules */
+    @page {
+      size: A4 portrait;
+      margin: 14mm 14mm;
+    }
+
+    @media print {
+      body {
+        background-color: #ffffff !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        display: block !important;
+      }
+
+      .screen-toolbar {
+        display: none !important;
+      }
+
+      .page-sheet {
+        box-shadow: none !important;
+        border: none !important;
+        padding: 0 !important;
+        max-width: 100% !important;
+        width: 100% !important;
+      }
+
+      .employee-details-table {
+        border: 1.5px solid #000000 !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+
+      .employee-details-table td {
+        border: 1px solid #000000 !important;
+        padding: 6px 8px !important;
+        font-size: 13px !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+
+      .form-header-banner {
+        border: 2px solid #000000 !important;
+        background-color: #000000 !important;
+        color: #ffffff !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+
+      .underline-blank, .underline-blank-short {
+        border-bottom: 1.2px solid #000000 !important;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Screen Only Toolbar -->
+  <div class="screen-toolbar">
+    <div class="title-area">
+      <h2>Adjustment Bill - Employee Details Section</h2>
+      <p>Official 4-Column Government Format (Print-Ready A4)</p>
+    </div>
+    <div class="btn-group">
+      <button class="btn btn-secondary" onclick="window.history.back()">
+        &larr; Back to App
+      </button>
+      <button class="btn btn-primary" onclick="window.print()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="6 9 6 2 18 2 18 9"></polyline>
+          <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+          <rect x="6" y="14" width="12" height="8"></rect>
+        </svg>
+        Print / Save PDF
+      </button>
+    </div>
+  </div>
+
+  <!-- Printable Page Sheet -->
+  <div class="page-sheet">
+
+    <div class="form-header-banner">
+      ADJUSTMENT BILL &mdash; EMPLOYEE &amp; DAO INFORMATION
+    </div>
+
+    <!-- 4-Column Grid Table -->
+    <table class="employee-details-table">
+      <colgroup>
+        <col class="col-1" />
+        <col class="col-2" />
+        <col class="col-3" />
+        <col class="col-4" />
+      </colgroup>
+      <tbody>
+        <!-- Row 1: Token No. | Date | Section | Cost Centre -->
+        <tr>
+          <td>
+            <span class="label">Token No.</span>
+            <span class="underline-blank" id="val-token"></span>
+          </td>
+          <td>
+            <span class="label">Date:</span>
+            <span class="underline-blank-short" id="val-date"></span>
+          </td>
+          <td>
+            <span class="label">Section</span>
+            <span class="value value-mono" id="val-section">GA-III</span>
+          </td>
+          <td>
+            <span class="label">Cost Centre</span>
+            <span class="value value-mono" id="val-cost-centre">HB0398</span>
+          </td>
+        </tr>
+
+        <!-- Row 2: Department (spans 2) | Designation (spans 2) -->
+        <tr>
+          <td colspan="2">
+            <span class="label">Department:-</span>
+            <span class="value" id="val-department">Education Department</span>
+          </td>
+          <td colspan="2">
+            <span class="label">Designation:</span>
+            <span class="value" id="val-designation">PST (BPS-14)</span>
+          </td>
+        </tr>
+
+        <!-- Row 3: Personnel No. | Name | S/o | CNIC -->
+        <tr>
+          <td>
+            <span class="label">Personnel No.</span>
+            <span class="value value-mono" id="val-personnel-no">11139423</span>
+          </td>
+          <td>
+            <span class="label">Name</span>
+            <span class="value" id="val-name">MUHAMMAD OWAIS</span>
+          </td>
+          <td>
+            <span class="label">S/o</span>
+            <span class="value" id="val-father-name">SHAMIM IQBAL</span>
+          </td>
+          <td>
+            <span class="label">CNIC</span>
+            <span class="value value-mono" id="val-cnic">41303-7744530-3</span>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+  </div>
+
+  <script>
+    // URL Parameter hydration (allows dynamic customization from the app)
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('section')) document.getElementById('val-section').textContent = params.get('section');
+    if (params.get('costCentre')) document.getElementById('val-cost-centre').textContent = params.get('costCentre');
+    if (params.get('department')) document.getElementById('val-department').textContent = params.get('department');
+    if (params.get('personnelNo')) document.getElementById('val-personnel-no').textContent = params.get('personnelNo');
+    if (params.get('name')) document.getElementById('val-name').textContent = params.get('name');
+    if (params.get('fatherName')) document.getElementById('val-father-name').textContent = params.get('fatherName');
+    if (params.get('designation')) document.getElementById('val-designation').textContent = params.get('designation');
+    if (params.get('cnic')) document.getElementById('val-cnic').textContent = params.get('cnic');
+  </script>
+</body>
+</html>

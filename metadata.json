@@ -1,0 +1,6 @@
+{
+  "name": "IBA PST & JEST Salary Arrears Bill Maker",
+  "description": "Government of Sindh Administrative & Employee Automation Hub featuring TR-22 Arrears Bill Generator, Computerized Salary Slip Generator, Difference Maker, Pension Papers (Form-1 & 35% Commutation), Official Formats Library, GPF & Salary Tax Estimators.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

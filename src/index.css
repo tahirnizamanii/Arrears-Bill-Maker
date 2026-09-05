@@ -1,0 +1,274 @@
+@import "tailwindcss";
+
+html, body, #root {
+  max-width: 100%;
+  overflow-x: hidden;
+  width: 100%;
+}
+
+/* Custom hide scrollbar utility */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* 
+ * Official Government Document Explicit CSS 
+ * Pure standard CSS with zero dependency on Tailwind CSS custom properties.
+ * Guarantees crisp borders, table gridlines, dark badges, and alignments in both
+ * print and canvas (html2canvas) export engines.
+ */
+.official-gov-doc,
+[id^="preview-"],
+[id^="export-"],
+[id^="cloned-"] {
+  font-family: Arial, "Helvetica Neue", Helvetica, sans-serif;
+  color: #000000;
+  background-color: #ffffff;
+  box-sizing: border-box;
+}
+
+[id^="preview-"] table,
+[id^="export-"] table,
+[id^="cloned-"] table {
+  border-collapse: collapse !important;
+  border-spacing: 0 !important;
+  width: 100% !important;
+}
+
+[id^="preview-"] table th,
+[id^="preview-"] table td,
+[id^="export-"] table th,
+[id^="export-"] table td,
+[id^="cloned-"] table th,
+[id^="cloned-"] table td {
+  border: 1px solid #000000 !important;
+  box-sizing: border-box !important;
+}
+
+[id^="preview-"] .border,
+[id^="preview-"] .border-black,
+[id^="export-"] .border,
+[id^="export-"] .border-black,
+[id^="cloned-"] .border,
+[id^="cloned-"] .border-black {
+  border: 1px solid #000000 !important;
+}
+
+[id^="preview-"] .border-b,
+[id^="export-"] .border-b,
+[id^="cloned-"] .border-b {
+  border-bottom: 1px solid #000000 !important;
+}
+
+[id^="preview-"] .border-b-2,
+[id^="export-"] .border-b-2,
+[id^="cloned-"] .border-b-2 {
+  border-bottom: 2px solid #000000 !important;
+}
+
+[id^="preview-"] .border-t,
+[id^="export-"] .border-t,
+[id^="cloned-"] .border-t {
+  border-top: 1px solid #000000 !important;
+}
+
+[id^="preview-"] .border-y-2,
+[id^="export-"] .border-y-2,
+[id^="cloned-"] .border-y-2 {
+  border-top: 2px solid #000000 !important;
+  border-bottom: 2px solid #000000 !important;
+}
+
+[id^="preview-"] .divide-x > * + *,
+[id^="export-"] .divide-x > * + *,
+[id^="cloned-"] .divide-x > * + * {
+  border-left: 1px solid #000000 !important;
+}
+
+[id^="preview-"] .divide-y > * + *,
+[id^="export-"] .divide-y > * + *,
+[id^="cloned-"] .divide-y > * + * {
+  border-top: 1px solid #000000 !important;
+}
+
+[id^="preview-"] .bg-black,
+[id^="export-"] .bg-black,
+[id^="cloned-"] .bg-black {
+  background-color: #000000 !important;
+  color: #ffffff !important;
+}
+
+[id^="preview-"] .text-white,
+[id^="export-"] .text-white,
+[id^="cloned-"] .text-white {
+  color: #ffffff !important;
+}
+
+[id^="preview-"] .bg-neutral-100,
+[id^="export-"] .bg-neutral-100,
+[id^="cloned-"] .bg-neutral-100 {
+  background-color: #f3f4f6 !important;
+}
+
+[id^="preview-"] .bg-neutral-50,
+[id^="export-"] .bg-neutral-50,
+[id^="cloned-"] .bg-neutral-50 {
+  background-color: #fafafa !important;
+}
+
+[id^="preview-"] .grid-cols-12,
+[id^="export-"] .grid-cols-12,
+[id^="cloned-"] .grid-cols-12 {
+  display: flex !important;
+  flex-direction: row !important;
+  width: 100% !important;
+}
+
+[id^="preview-"] .col-span-1,
+[id^="export-"] .col-span-1,
+[id^="cloned-"] .col-span-1 {
+  width: 8.333333% !important;
+  flex-shrink: 0 !important;
+}
+
+[id^="preview-"] .col-span-2,
+[id^="export-"] .col-span-2,
+[id^="cloned-"] .col-span-2 {
+  width: 16.666667% !important;
+  flex-shrink: 0 !important;
+}
+
+[id^="preview-"] .col-span-3,
+[id^="export-"] .col-span-3,
+[id^="cloned-"] .col-span-3 {
+  width: 25% !important;
+  flex-shrink: 0 !important;
+}
+
+[id^="preview-"] .col-span-4,
+[id^="export-"] .col-span-4,
+[id^="cloned-"] .col-span-4 {
+  width: 33.333333% !important;
+  flex-shrink: 0 !important;
+}
+
+[id^="preview-"] .col-span-5,
+[id^="export-"] .col-span-5,
+[id^="cloned-"] .col-span-5 {
+  width: 41.666667% !important;
+  flex-shrink: 0 !important;
+}
+
+[id^="preview-"] .col-span-6,
+[id^="export-"] .col-span-6,
+[id^="cloned-"] .col-span-6 {
+  width: 50% !important;
+  flex-shrink: 0 !important;
+}
+
+[id^="preview-"] .col-span-7,
+[id^="export-"] .col-span-7,
+[id^="cloned-"] .col-span-7 {
+  width: 58.333333% !important;
+  flex-shrink: 0 !important;
+}
+
+[id^="preview-"] .col-span-8,
+[id^="export-"] .col-span-8,
+[id^="cloned-"] .col-span-8 {
+  width: 66.666667% !important;
+  flex-shrink: 0 !important;
+}
+
+[id^="preview-"] .col-span-9,
+[id^="export-"] .col-span-9,
+[id^="cloned-"] .col-span-9 {
+  width: 75% !important;
+  flex-shrink: 0 !important;
+}
+
+[id^="preview-"] .col-span-10,
+[id^="export-"] .col-span-10,
+[id^="cloned-"] .col-span-10 {
+  width: 83.333333% !important;
+  flex-shrink: 0 !important;
+}
+
+[id^="preview-"] .col-span-11,
+[id^="export-"] .col-span-11,
+[id^="cloned-"] .col-span-11 {
+  width: 91.666667% !important;
+  flex-shrink: 0 !important;
+}
+
+[id^="preview-"] .col-span-12,
+[id^="export-"] .col-span-12,
+[id^="cloned-"] .col-span-12 {
+  width: 100% !important;
+  flex-shrink: 0 !important;
+}
+
+@layer utilities {
+  @media print {
+    @page {
+      size: A4 portrait;
+      margin: 8mm 6mm;
+    }
+    body {
+      background-color: #ffffff !important;
+      color: #000000 !important;
+      font-size: 10pt;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+    .no-print {
+      display: none !important;
+    }
+    .print-only {
+      display: block !important;
+    }
+    .page-break {
+      page-break-after: always;
+      break-after: page;
+    }
+    header, footer, nav, button {
+      display: none !important;
+    }
+    #covering-letter-page,
+    #adjustment-bill-page,
+    #tr22-obverse-page,
+    #schedule-part1-page,
+    #schedule-part2-page,
+    #tr22-reverse-page,
+    #preview-covering-page,
+    #preview-adjustment-page,
+    #preview-tr22-obverse-page,
+    #preview-schedule-part1-page,
+    #preview-schedule-part2-page,
+    #preview-tr22-reverse-page,
+    #export-covering-letter-page,
+    #export-adjustment-bill-page,
+    #export-tr22-obverse-page,
+    #export-schedule-part1-page,
+    #export-schedule-part2-page,
+    #export-tr22-reverse-page {
+      box-shadow: none !important;
+      border: 1px solid #000000 !important;
+      margin: 0 auto !important;
+      padding: 6mm 8mm !important;
+      page-break-after: always !important;
+      break-after: page !important;
+      page-break-inside: avoid !important;
+      break-inside: avoid !important;
+      min-height: 268mm !important;
+      max-height: 278mm !important;
+      width: 100% !important;
+      max-width: 100% !important;
+      box-sizing: border-box !important;
+    }
+  }
+}
